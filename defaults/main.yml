@@ -10,7 +10,7 @@ qbittorrent_uid: ''
 qbittorrent_gid: ''
 qbittorrent_timezone: 'Etc/UTC'
 
-qbittorrent_version: 5.0.4
+qbittorrent_version: 5.1.0
 qbittorrent_arch: amd64
 
 # The hostname at which qbittorrent is served.
