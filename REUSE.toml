@@ -8,6 +8,7 @@ version = 1
 [[annotations]]
 path = [
     ".github/workflows/ansible-lint.yml",
+    ".github/renovate.json",
     "meta/main.yml",
     ".ansible-lint",
     ".yamllint.yml",
