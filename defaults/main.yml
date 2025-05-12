@@ -15,7 +15,7 @@ qbittorrent_gid: ''
 qbittorrent_timezone: 'Etc/UTC'
 
 # renovate: datasource=docker depName=lscr.io/linuxserver/qbittorrent versioning=semver
-qbittorrent_version: 5.1.0
+qbittorrent_version: 14.3.9
 qbittorrent_arch: amd64
 
 # The hostname at which qbittorrent is served.
