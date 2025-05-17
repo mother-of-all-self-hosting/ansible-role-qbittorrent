@@ -108,13 +108,13 @@ qbittorrent_container_labels_traefik_tls_certResolver: default  # noqa var-namin
 #   another.label="here"
 qbittorrent_container_labels_additional_labels: ''
 
-# qbittorrent_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
+# qbittorrent_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
 #
 # Example:
-# qbittorrent_container_additional_environment_variables: |
+# qbittorrent_environment_variables_additional_variables: |
 #   VAR=1
 #   ANOTHER=value
-qbittorrent_container_additional_environment_variables: ''
+qbittorrent_environment_variables_additional_variables: ''
 
 # A list of additional "volumes" to mount in the container.
 #
