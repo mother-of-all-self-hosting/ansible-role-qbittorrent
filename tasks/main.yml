@@ -1,23 +1,24 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 spatterlight
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
 
-- name: Install qBittorrent
+- name: Perform qBittorrent installation tasks
+  block:
+    - name: Validate qBittorrent configuration
+      when: qbittorrent_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+
+    - name: Install qBittorrent
+      when: qbittorrent_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
   tags:
     - setup-all
     - setup-qbittorrent
     - install-all
     - install-qbittorrent
-  block:
-    - name: Run qBittorrent validation tasks
-      when: qbittorrent_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - name: Run qBittorrent installation tasks
-      when: qbittorrent_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
 - name: Get the qBittorrent temporary password
   tags:
@@ -27,11 +28,11 @@
       when: qbittorrent_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/print_qbittorrent_password.yml"
 
-- name: Uninstall qBittorrent
+- name: Perform qBittorrent uninstallation tasks
+  block:
+    - name: Uninstall qBittorrent
+      when: not qbittorrent_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
   tags:
     - setup-all
     - setup-qbittorrent
-  block:
-    - name: Run qBittorrent uninstallation tasks
-      when: not qbittorrent_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
