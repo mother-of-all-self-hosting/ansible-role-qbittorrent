@@ -6,6 +6,11 @@
 ---
 
 - name: Perform qBittorrent installation tasks
+  tags:
+    - setup-all
+    - setup-qbittorrent
+    - install-all
+    - install-qbittorrent
   block:
     - name: Validate qBittorrent configuration
       when: qbittorrent_enabled | bool
@@ -14,11 +19,6 @@
     - name: Install qBittorrent
       when: qbittorrent_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
-  tags:
-    - setup-all
-    - setup-qbittorrent
-    - install-all
-    - install-qbittorrent
 
 - name: Get the qBittorrent temporary password
   tags:
@@ -29,10 +29,10 @@
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/print_qbittorrent_password.yml"
 
 - name: Perform qBittorrent uninstallation tasks
+  tags:
+    - setup-all
+    - setup-qbittorrent
   block:
     - name: Uninstall qBittorrent
       when: not qbittorrent_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
-  tags:
-    - setup-all
-    - setup-qbittorrent
