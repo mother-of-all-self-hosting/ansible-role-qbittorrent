@@ -22,40 +22,40 @@ ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_s
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ qbittorrent_identifier }} 2>/dev/null || true'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-			--rm \
-			--name={{ qbittorrent_identifier }} \
-			--log-driver=none \
-			--user={{ qbittorrent_uid }}:{{ qbittorrent_gid }} \
-			--cap-drop=ALL \
-			--cap-add=SETUID \
-			--cap-add=SETGID \
-			--cap-add=CHOWN \
-			--cap-add=FOWNER \
-			--cap-add=DAC_OVERRIDE \
-			--read-only \
-			--network={{ qbittorrent_container_network }} \
-			{% if qbittorrent_container_webui_bind_port %}
-			-p {{ qbittorrent_container_webui_bind_port }}:{{ qbittorrent_container_webui_port }} \
-			{% endif %}
-			{% if qbittorrent_container_torrenting_bind_port %}
-			-p {{ qbittorrent_container_torrenting_bind_port }}:{{ qbittorrent_container_torrenting_port }} \
-			{% endif %}
-			{% if qbittorrent_container_torrenting_bind_port %}
-			-p {{ qbittorrent_container_torrenting_bind_port }}:{{ qbittorrent_container_torrenting_port }}/udp \
-			{% endif %}
-			--env-file={{ qbittorrent_base_path }}/env \
-			--label-file={{ qbittorrent_base_path }}/labels \
-			--mount type=bind,src={{ qbittorrent_data_path }},dst=/config \
-			--mount type=bind,src={{ qbittorrent_download_path }},dst={{ qbittorrent_download_bind_path }} \
-			{% for volume in qbittorrent_container_additional_volumes %}
-			--mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
-			{% endfor %}
-			# https://docs.linuxserver.io/misc/read-only/#how
-			--tmpfs=/run:rw,exec,nosuid,size=128m \
-			{% for arg in qbittorrent_container_extra_arguments %}
-			{{ arg }} \
-			{% endfor %}
-			{{ qbittorrent_container_image }}
+      --rm \
+      --name={{ qbittorrent_identifier }} \
+      --log-driver=none \
+      --user={{ qbittorrent_uid }}:{{ qbittorrent_gid }} \
+      --cap-drop=ALL \
+      --cap-add=SETUID \
+      --cap-add=SETGID \
+      --cap-add=CHOWN \
+      --cap-add=FOWNER \
+      --cap-add=DAC_OVERRIDE \
+      --read-only \
+      --network={{ qbittorrent_container_network }} \
+      {% if qbittorrent_container_webui_bind_port %}
+      -p {{ qbittorrent_container_webui_bind_port }}:{{ qbittorrent_container_webui_port }} \
+      {% endif %}
+      {% if qbittorrent_container_torrenting_bind_port %}
+      -p {{ qbittorrent_container_torrenting_bind_port }}:{{ qbittorrent_container_torrenting_port }} \
+      {% endif %}
+      {% if qbittorrent_container_torrenting_bind_port %}
+      -p {{ qbittorrent_container_torrenting_bind_port }}:{{ qbittorrent_container_torrenting_port }}/udp \
+      {% endif %}
+      --env-file={{ qbittorrent_base_path }}/env \
+      --label-file={{ qbittorrent_base_path }}/labels \
+      --mount type=bind,src={{ qbittorrent_data_path }},dst=/config \
+      --mount type=bind,src={{ qbittorrent_download_path }},dst={{ qbittorrent_download_bind_path }} \
+      {% for volume in qbittorrent_container_additional_volumes %}
+      --mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
+      {% endfor %}
+      # https://docs.linuxserver.io/misc/read-only/#how
+      --tmpfs=/run:rw,exec,nosuid,size=128m \
+      {% for arg in qbittorrent_container_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
+      {{ qbittorrent_container_image }}
 
 {% for network in qbittorrent_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ qbittorrent_identifier }}
