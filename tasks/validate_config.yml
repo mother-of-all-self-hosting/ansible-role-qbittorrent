@@ -16,7 +16,7 @@
 
 - name: Fail if required qBittorrent settings not defined
   ansible.builtin.fail:
-    msg: >
+    msg: >-
       You need to define a required configuration setting (`{{ item }}`).
   when: "vars[item] | length == 0"
   with_items:
@@ -26,7 +26,7 @@
 
 - name: Fail if qBittorrent architecture is not supported
   ansible.builtin.fail:
-    msg: >
+    msg: >-
       Your configuration specifies a CPU architecture (`{{ qbittorrent_arch }}`) which is not currently supported.
       This qBittorrent role also does not support self-building yet, so it's not possible to make use of it.
   when: "qbittorrent_arch not in ['amd64', 'arm64']"
