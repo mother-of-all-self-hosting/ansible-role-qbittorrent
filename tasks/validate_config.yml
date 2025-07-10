@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: (Deprecation) Catch and report renamed settings
   ansible.builtin.fail:
     msg: >-
@@ -12,7 +11,7 @@
       Please change your configuration to rename the variable (`{{ item.old }}` -> `{{ item.new }}`).
   when: "item.old in vars"
   with_items:
-    - {'old': 'qbittorrent_container_additional_environment_variables', 'new': 'qbittorrent_environment_variables_additional_variables'}
+    - { "old": "qbittorrent_container_additional_environment_variables", "new": "qbittorrent_environment_variables_additional_variables" }
 
 - name: Fail if required qBittorrent settings not defined
   ansible.builtin.fail:
