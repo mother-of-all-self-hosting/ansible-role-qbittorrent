@@ -17,7 +17,7 @@ Check [defaults/main.yml](defaults/main.yml) for the full list of supported opti
 
 For an Ansible playbook which integrates this role and makes it easier to use, see the [mash-playbook](https://github.com/mother-of-all-self-hosting/mash-playbook).
 
-# Limitations
+## Limitations
 
 This role configures qBittorrent with security in mind by doing the following:
 
@@ -37,5 +37,11 @@ Unfortunately, due to upstream requirements, some admissions had to be made:
 
 You can read more about these upstream requirements in the documentation:
 
-1. https://docs.linuxserver.io/misc/non-root/
-2. https://docs.linuxserver.io/misc/read-only/
+1. <https://docs.linuxserver.io/misc/non-root/>
+2. <https://docs.linuxserver.io/misc/read-only/>
+
+## Development
+
+You can optionally install [pre-commit](https://pre-commit.com/) so that simple mistakes are checked and noticed before changes are pushed to a remote branch. See [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) for which hooks are to be executed.
+
+See [this section](https://pre-commit.com/#usage) on the official documentation for usage.

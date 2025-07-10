@@ -1,6 +1,7 @@
 ---
-# .ansible-lint
+profile: production # min, basic, moderate, safety, shared, production
 
-profile: production # min, basic, moderate,safety, shared, production
+skip_list:
+  - yaml[line-length]
 
-skip_list: []
+offline: true
