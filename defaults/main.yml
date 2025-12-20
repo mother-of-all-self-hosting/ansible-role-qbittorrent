@@ -1,22 +1,32 @@
+# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
+# SPDX-FileCopyrightText: 2025 MASH project contributors
 # SPDX-FileCopyrightText: 2025 spatterlight
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 # Project source code URL: https://github.com/qBittorrent/qBittorrent
 
 qbittorrent_enabled: true
 
 qbittorrent_identifier: qbittorrent
-
-qbittorrent_uid: ''
-qbittorrent_gid: ''
-qbittorrent_timezone: 'Etc/UTC'
+qbittorrent_base_path: "{{ qbittorrent_identifier }}"
+qbittorrent_data_path: "{{ qbittorrent_base_path }}/data"
+# The path where downloaded files will be stored on the host system
+qbittorrent_download_path: "{{ qbittorrent_base_path }}/downloads"
+# The path at which qbittorrent_download_path is mounted to inside the container
+qbittorrent_download_bind_path: "/downloads"
 
 # The upstream project does not support Renovate. See: https://github.com/linuxserver/docker-qbittorrent/issues/249
 qbittorrent_version: 5.1.2
+
 qbittorrent_arch: amd64
+
+qbittorrent_uid: ''
+qbittorrent_gid: ''
 
 # The hostname at which qbittorrent is served.
 qbittorrent_hostname: ''
@@ -25,60 +35,10 @@ qbittorrent_hostname: ''
 # This value must either be `/` or not end with a slash (e.g. `/qbittorrent`).
 qbittorrent_path_prefix: /
 
-qbittorrent_base_path: "{{ qbittorrent_identifier }}"
-qbittorrent_data_path: "{{ qbittorrent_base_path }}/data"
-
-# The path where downloaded files will be stored on the host system
-qbittorrent_download_path: "{{ qbittorrent_base_path }}/downloads"
-
-# The path at which qbittorrent_download_path is mounted to inside the container
-qbittorrent_download_bind_path: "/downloads"
-
 qbittorrent_container_image: "{{ qbittorrent_container_image_registry_prefix }}linuxserver/qbittorrent:{{ qbittorrent_container_image_tag }}"
 qbittorrent_container_image_tag: "{{ qbittorrent_version }}"
 qbittorrent_container_image_registry_prefix: lscr.io/
 qbittorrent_container_image_force_pull: "{{ qbittorrent_container_image.endswith(':latest') }}"
-
-# The base container network. It will be auto-created by this role if it doesn't exist already.
-qbittorrent_container_network: "{{ qbittorrent_identifier }}"
-
-# A list of additional container networks that the container would be connected to.
-# The role does not create these networks, so make sure they already exist.
-qbittorrent_container_additional_networks: "{{ (qbittorrent_container_additional_networks_default + qbittorrent_container_additional_networks_auto + qbittorrent_container_additional_networks_custom) | unique }}"
-qbittorrent_container_additional_networks_default: []
-qbittorrent_container_additional_networks_auto: []
-qbittorrent_container_additional_networks_custom: []
-
-# Controls how long to wait for the container to stop gracefully before killing it.
-# Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
-# we default to at least 30 seconds.
-qbittorrent_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
-
-# List of systemd services that the qBittorrent systemd service depends on
-qbittorrent_systemd_required_services_list: "{{ (qbittorrent_systemd_required_services_list_default + qbittorrent_systemd_required_services_list_auto + qbittorrent_systemd_required_services_list_custom) | unique }}"
-qbittorrent_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
-qbittorrent_systemd_required_services_list_auto: []
-qbittorrent_systemd_required_services_list_custom: []
-
-# List of systemd services that the qBittorrent systemd service wants
-qbittorrent_systemd_wanted_services_list: "{{ (qbittorrent_systemd_wanted_services_list_default + qbittorrent_systemd_wanted_services_list_auto + qbittorrent_systemd_wanted_services_list_custom) | unique }}"
-qbittorrent_systemd_wanted_services_list_default: []
-qbittorrent_systemd_wanted_services_list_auto: []
-qbittorrent_systemd_wanted_services_list_custom: []
-
-# The port qBittorrent is running the WebUI on inside the container
-qbittorrent_container_webui_port: 8080
-
-# Controls whether the container exposes the WebUI port
-# Can be used to access the WebUI directly (bypassing Traefik)
-#
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8080"), or empty string to not expose.
-qbittorrent_container_webui_bind_port: ""
-
-# The port qBittorrent is listening for torrents on inside the container
-#
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8080"), or empty string to not expose.
-qbittorrent_container_torrenting_port: 6881
 
 # Controls whether the container exposes its torrenting port
 # To become an "active node" you'll want to set this and configure port-forwarding in your router
@@ -87,34 +47,29 @@ qbittorrent_container_torrenting_port: 6881
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:6881"), or empty string to not expose.
 qbittorrent_container_torrenting_bind_port: ""
 
-# To inject your own other container labels, see `qbittorrent_container_labels_additional_labels`.
-qbittorrent_container_labels_traefik_enabled: true
-qbittorrent_container_labels_traefik_docker_network: "{{ qbittorrent_container_network }}"
-qbittorrent_container_labels_traefik_hostname: "{{ qbittorrent_hostname }}"
-# The path prefix must either be `/` or not end with a slash (e.g. `/qbittorrent`).
-qbittorrent_container_labels_traefik_path_prefix: "{{ qbittorrent_path_prefix }}"
-qbittorrent_container_labels_traefik_rule: "Host(`{{ qbittorrent_container_labels_traefik_hostname }}`){% if qbittorrent_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ qbittorrent_container_labels_traefik_path_prefix }}`){% endif %}"
-qbittorrent_container_labels_traefik_priority: 0
-qbittorrent_container_labels_traefik_entrypoints: web-secure
-qbittorrent_container_labels_traefik_tls: "{{ qbittorrent_container_labels_traefik_entrypoints != 'web' }}"
-qbittorrent_container_labels_traefik_tls_certResolver: default  # noqa var-naming
-
-# qbittorrent_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
-# See `../templates/labels.j2` for details.
+# Controls whether the container exposes the WebUI port
+# Can be used to access the WebUI directly (bypassing Traefik)
 #
-# Example:
-# qbittorrent_container_labels_additional_labels: |
-#   my.label=1
-#   another.label="here"
-qbittorrent_container_labels_additional_labels: ''
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8080"), or empty string to not expose.
+qbittorrent_container_webui_bind_port: ""
 
-# qbittorrent_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
+# The base container network. It will be auto-created by this role if it doesn't exist already.
+qbittorrent_container_network: "{{ qbittorrent_identifier }}"
+
+# The port qBittorrent is listening for torrents on inside the container
 #
-# Example:
-# qbittorrent_environment_variables_additional_variables: |
-#   VAR=1
-#   ANOTHER=value
-qbittorrent_environment_variables_additional_variables: ''
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8080"), or empty string to not expose.
+qbittorrent_container_torrenting_port: 6881
+
+# The port qBittorrent is running the WebUI on inside the container
+qbittorrent_container_webui_port: 8080
+
+# A list of additional container networks that the container would be connected to.
+# The role does not create these networks, so make sure they already exist.
+qbittorrent_container_additional_networks: "{{ (qbittorrent_container_additional_networks_default + qbittorrent_container_additional_networks_auto + qbittorrent_container_additional_networks_custom) | unique }}"
+qbittorrent_container_additional_networks_default: []
+qbittorrent_container_additional_networks_auto: []
+qbittorrent_container_additional_networks_custom: []
 
 # A list of additional "volumes" to mount in the container.
 #
@@ -131,5 +86,53 @@ qbittorrent_environment_variables_additional_variables: ''
 #     options: readonly
 qbittorrent_container_additional_volumes: []
 
+# To inject your own other container labels, see `qbittorrent_container_labels_additional_labels`.
+qbittorrent_container_labels_traefik_enabled: true
+qbittorrent_container_labels_traefik_docker_network: "{{ qbittorrent_container_network }}"
+qbittorrent_container_labels_traefik_hostname: "{{ qbittorrent_hostname }}"
+# The path prefix must either be `/` or not end with a slash (e.g. `/qbittorrent`).
+qbittorrent_container_labels_traefik_path_prefix: "{{ qbittorrent_path_prefix }}"
+qbittorrent_container_labels_traefik_rule: "Host(`{{ qbittorrent_container_labels_traefik_hostname }}`){% if qbittorrent_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ qbittorrent_container_labels_traefik_path_prefix }}`){% endif %}"
+qbittorrent_container_labels_traefik_priority: 0
+qbittorrent_container_labels_traefik_entrypoints: web-secure
+qbittorrent_container_labels_traefik_tls: "{{ qbittorrent_container_labels_traefik_entrypoints != 'web' }}"
+qbittorrent_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+
+# Controls how long to wait for the container to stop gracefully before killing it.
+# Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
+# we default to at least 30 seconds.
+qbittorrent_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
+
+# qbittorrent_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
+# See `../templates/labels.j2` for details.
+#
+# Example:
+# qbittorrent_container_labels_additional_labels: |
+#   my.label=1
+#   another.label="here"
+qbittorrent_container_labels_additional_labels: ''
+
 # A list of extra arguments to pass to the container
 qbittorrent_container_extra_arguments: []
+
+# List of systemd services that the qBittorrent systemd service depends on
+qbittorrent_systemd_required_services_list: "{{ (qbittorrent_systemd_required_services_list_default + qbittorrent_systemd_required_services_list_auto + qbittorrent_systemd_required_services_list_custom) | unique }}"
+qbittorrent_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
+qbittorrent_systemd_required_services_list_auto: []
+qbittorrent_systemd_required_services_list_custom: []
+
+# List of systemd services that the qBittorrent systemd service wants
+qbittorrent_systemd_wanted_services_list: "{{ (qbittorrent_systemd_wanted_services_list_default + qbittorrent_systemd_wanted_services_list_auto + qbittorrent_systemd_wanted_services_list_custom) | unique }}"
+qbittorrent_systemd_wanted_services_list_default: []
+qbittorrent_systemd_wanted_services_list_auto: []
+qbittorrent_systemd_wanted_services_list_custom: []
+
+qbittorrent_timezone: 'Etc/UTC'
+
+# qbittorrent_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
+#
+# Example:
+# qbittorrent_environment_variables_additional_variables: |
+#   VAR=1
+#   ANOTHER=value
+qbittorrent_environment_variables_additional_variables: ''
