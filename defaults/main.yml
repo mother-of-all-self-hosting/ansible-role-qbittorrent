@@ -127,7 +127,7 @@ qbittorrent_systemd_wanted_services_list_auto: []
 qbittorrent_systemd_wanted_services_list_custom: []
 
 # Specify the timezone
-qbittorrent_timezone: 'Etc/UTC'
+qbittorrent_environment_variables_tz: 'Etc/UTC'
 
 # qbittorrent_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
 #
