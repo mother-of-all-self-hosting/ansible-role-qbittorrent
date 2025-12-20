@@ -28,10 +28,10 @@ qbittorrent_arch: amd64
 qbittorrent_uid: ""
 qbittorrent_gid: ""
 
-# The hostname at which qbittorrent is served.
+# The hostname at which qBittorrent is served.
 qbittorrent_hostname: ""
 
-# The path at which qbittorrent is served.
+# The path at which qBittorrent is served.
 # This value must either be `/` or not end with a slash (e.g. `/qbittorrent`).
 qbittorrent_path_prefix: /
 
