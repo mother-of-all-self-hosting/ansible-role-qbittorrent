@@ -25,11 +25,11 @@ qbittorrent_version: 5.1.2
 
 qbittorrent_arch: amd64
 
-qbittorrent_uid: ''
-qbittorrent_gid: ''
+qbittorrent_uid: ""
+qbittorrent_gid: ""
 
 # The hostname at which qbittorrent is served.
-qbittorrent_hostname: ''
+qbittorrent_hostname: ""
 
 # The path at which qbittorrent is served.
 # This value must either be `/` or not end with a slash (e.g. `/qbittorrent`).
@@ -110,7 +110,7 @@ qbittorrent_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_
 # qbittorrent_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-qbittorrent_container_labels_additional_labels: ''
+qbittorrent_container_labels_additional_labels: ""
 
 # A list of extra arguments to pass to the container
 qbittorrent_container_extra_arguments: []
@@ -135,4 +135,4 @@ qbittorrent_timezone: 'Etc/UTC'
 # qbittorrent_environment_variables_additional_variables: |
 #   VAR=1
 #   ANOTHER=value
-qbittorrent_environment_variables_additional_variables: ''
+qbittorrent_environment_variables_additional_variables: ""
