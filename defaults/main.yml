@@ -112,7 +112,9 @@ qbittorrent_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_
 qbittorrent_container_labels_additional_labels: ""
 
 # A list of extra arguments to pass to the container (`docker run` command)
-qbittorrent_container_extra_arguments: []
+qbittorrent_container_extra_arguments: "{{ qbittorrent_container_extra_arguments_auto + qbittorrent_container_extra_arguments_custom }}"
+qbittorrent_container_extra_arguments_auto: []
+qbittorrent_container_extra_arguments_custom: []
 
 # List of systemd services that the qBittorrent systemd service depends on
 qbittorrent_systemd_required_services_list: "{{ (qbittorrent_systemd_required_services_list_default + qbittorrent_systemd_required_services_list_auto + qbittorrent_systemd_required_services_list_custom) | unique }}"
