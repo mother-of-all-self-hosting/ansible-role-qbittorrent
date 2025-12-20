@@ -22,6 +22,8 @@
     - qbittorrent_uid
     - qbittorrent_gid
     - qbittorrent_hostname
+    - qbittorrent_path_prefix
+    - qbittorrent_container_network
 
 - name: Fail if qBittorrent architecture is not supported
   ansible.builtin.fail:
