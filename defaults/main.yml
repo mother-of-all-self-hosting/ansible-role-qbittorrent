@@ -21,7 +21,7 @@ qbittorrent_download_path: "{{ qbittorrent_base_path }}/downloads"
 qbittorrent_download_bind_path: "/downloads"
 
 # The upstream project does not support Renovate. See: https://github.com/linuxserver/docker-qbittorrent/issues/249
-qbittorrent_version: 5.1.2
+qbittorrent_version: 5.1.4
 
 qbittorrent_arch: amd64
 
