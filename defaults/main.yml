@@ -82,6 +82,9 @@ qbittorrent_container_additional_volumes: "{{ qbittorrent_container_additional_v
 qbittorrent_container_additional_volumes_auto: []
 qbittorrent_container_additional_volumes_custom: []
 
+# qbittorrent_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
+# See `../templates/labels.j2` for details.
+#
 # To inject your own other container labels, see `qbittorrent_container_labels_additional_labels`.
 qbittorrent_container_labels_traefik_enabled: true
 qbittorrent_container_labels_traefik_docker_network: "{{ qbittorrent_container_network }}"
@@ -108,7 +111,7 @@ qbittorrent_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_
 #   another.label="here"
 qbittorrent_container_labels_additional_labels: ""
 
-# A list of extra arguments to pass to the container
+# A list of extra arguments to pass to the container (`docker run` command)
 qbittorrent_container_extra_arguments: []
 
 # List of systemd services that the qBittorrent systemd service depends on
@@ -123,6 +126,7 @@ qbittorrent_systemd_wanted_services_list_default: []
 qbittorrent_systemd_wanted_services_list_auto: []
 qbittorrent_systemd_wanted_services_list_custom: []
 
+# Specify the timezone
 qbittorrent_timezone: 'Etc/UTC'
 
 # qbittorrent_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
