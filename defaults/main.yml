@@ -37,7 +37,9 @@ qbittorrent_path_prefix: /
 
 qbittorrent_container_image: "{{ qbittorrent_container_image_registry_prefix }}linuxserver/qbittorrent:{{ qbittorrent_container_image_tag }}"
 qbittorrent_container_image_tag: "{{ qbittorrent_version }}"
-qbittorrent_container_image_registry_prefix: lscr.io/
+qbittorrent_container_image_registry_prefix: "{{ qbittorrent_container_image_registry_prefix_upstream }}"
+qbittorrent_container_image_registry_prefix_upstream: "{{ qbittorrent_container_image_registry_prefix_upstream_default }}"
+qbittorrent_container_image_registry_prefix_upstream_default: lscr.io/
 qbittorrent_container_image_force_pull: "{{ qbittorrent_container_image.endswith(':latest') }}"
 
 # Controls whether the container exposes its torrenting port
