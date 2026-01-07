@@ -41,4 +41,6 @@ traefik.http.routers.{{ qbittorrent_identifier }}.tls.certResolver={{ qbittorren
 traefik.http.services.{{ qbittorrent_identifier }}.loadbalancer.server.port={{ qbittorrent_container_webui_port }}
 {% endif %}
 
-{{ qbittorrent_container_labels_additional_labels }}
+{% for arg in qbittorrent_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}

@@ -108,11 +108,11 @@ qbittorrent_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_
 #
 # Example:
 # qbittorrent_container_labels_additional_labels_custom: |
-#   my.label=1
-#   another.label="here"
-qbittorrent_container_labels_additional_labels: "{{ qbittorrent_container_labels_additional_labels_auto | combine(qbittorrent_container_labels_additional_labels_custom) }}"
-qbittorrent_container_labels_additional_labels_auto: {}
-qbittorrent_container_labels_additional_labels_custom: {}
+#   - my.label=1
+#   - another.label="here"
+qbittorrent_container_labels_additional_labels: "{{ qbittorrent_container_labels_additional_labels_auto + qbittorrent_container_labels_additional_labels_custom }}"
+qbittorrent_container_labels_additional_labels_auto: []
+qbittorrent_container_labels_additional_labels_custom: []
 
 # A list of extra arguments to pass to the container (`docker create` command)
 qbittorrent_container_extra_arguments: "{{ qbittorrent_container_extra_arguments_auto + qbittorrent_container_extra_arguments_custom }}"
