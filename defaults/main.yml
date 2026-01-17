@@ -42,6 +42,9 @@ qbittorrent_container_image_registry_prefix_upstream: "{{ qbittorrent_container_
 qbittorrent_container_image_registry_prefix_upstream_default: lscr.io/
 qbittorrent_container_image_force_pull: "{{ qbittorrent_container_image.endswith(':latest') }}"
 
+# The base container network. It will be auto-created by this role if it doesn't exist already.
+qbittorrent_container_network: "{{ qbittorrent_identifier }}"
+
 # Controls whether the container exposes its torrenting port
 # To become an "active node" you'll want to set this and configure port-forwarding in your router
 # NOTE: This will be exposed with both TCP and UDP
@@ -54,9 +57,6 @@ qbittorrent_container_torrenting_bind_port: ""
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 qbittorrent_container_webui_bind_port: ""
-
-# The base container network. It will be auto-created by this role if it doesn't exist already.
-qbittorrent_container_network: "{{ qbittorrent_identifier }}"
 
 # The port qBittorrent is listening for torrents on inside the container
 #
