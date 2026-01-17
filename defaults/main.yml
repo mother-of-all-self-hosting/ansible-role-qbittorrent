@@ -45,26 +45,24 @@ qbittorrent_container_image_force_pull: "{{ qbittorrent_container_image.endswith
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 qbittorrent_container_network: "{{ qbittorrent_identifier }}"
 
-# Controls whether the container exposes its torrenting port
+# Specify how the container publishes its HTTP port (as defined by `qbittorrent_container_http_port`).
+# Can be used to access the web UI directly (bypassing Traefik)
+#
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
+qbittorrent_container_http_host_bind_port: ""
+
+# Specify how the container publishes its torrenting port (as defined by `qbittorrent_container_torrenting_port`).
 # To become an "active node" you'll want to set this and configure port-forwarding in your router
 # NOTE: This will be exposed with both TCP and UDP
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
-qbittorrent_container_torrenting_bind_port: ""
+qbittorrent_container_torrenting_host_bind_port: ""
 
-# Controls whether the container exposes the WebUI port
-# Can be used to access the WebUI directly (bypassing Traefik)
-#
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
-qbittorrent_container_webui_bind_port: ""
+# The port number in the container for the web UI
+qbittorrent_container_http_port: 8080
 
-# The port qBittorrent is listening for torrents on inside the container
-#
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
+# The port number in the container for torrenting
 qbittorrent_container_torrenting_port: 6881
-
-# The port qBittorrent is running the WebUI on inside the container
-qbittorrent_container_webui_port: 8080
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.

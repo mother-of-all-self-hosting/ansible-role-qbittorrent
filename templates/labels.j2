@@ -38,7 +38,7 @@ traefik.http.routers.{{ qbittorrent_identifier }}.tls={{ qbittorrent_container_l
 traefik.http.routers.{{ qbittorrent_identifier }}.tls.certResolver={{ qbittorrent_container_labels_traefik_tls_certResolver }}
 {% endif %}
 
-traefik.http.services.{{ qbittorrent_identifier }}.loadbalancer.server.port={{ qbittorrent_container_webui_port }}
+traefik.http.services.{{ qbittorrent_identifier }}.loadbalancer.server.port={{ qbittorrent_container_http_port }}
 {% endif %}
 
 {% for arg in qbittorrent_container_labels_additional_labels %}

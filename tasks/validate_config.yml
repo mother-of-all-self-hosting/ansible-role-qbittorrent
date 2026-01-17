@@ -11,6 +11,9 @@
       Please change your configuration to rename the variable (`{{ item.old }}` -> `{{ item.new }}`).
   when: "lookup('ansible.builtin.varnames', ('^' + item.old + '$'), wantlist=True) | length > 0"
   with_items:
+    - { "old": "qbittorrent_container_torrenting_bind_port", "new": "qbittorrent_container_torrenting_host_bind_port" }
+    - { "old": "qbittorrent_container_webui_bind_port", "new": "qbittorrent_container_http_host_bind_port" }
+    - { "old": "qbittorrent_container_webui_port", "new": "qbittorrent_container_http_port" }
     - { "old": "qbittorrent_container_additional_environment_variables", "new": "qbittorrent_environment_variables_additional_variables" }
 
 - name: Fail if required qBittorrent settings not defined

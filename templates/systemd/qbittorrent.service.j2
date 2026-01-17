@@ -34,14 +34,14 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --cap-add=DAC_OVERRIDE \
       --read-only \
       --network={{ qbittorrent_container_network }} \
-      {% if qbittorrent_container_webui_bind_port %}
-      -p {{ qbittorrent_container_webui_bind_port }}:{{ qbittorrent_container_webui_port }} \
+      {% if qbittorrent_container_http_host_bind_port %}
+      -p {{ qbittorrent_container_http_host_bind_port }}:{{ qbittorrent_container_http_port }} \
       {% endif %}
-      {% if qbittorrent_container_torrenting_bind_port %}
-      -p {{ qbittorrent_container_torrenting_bind_port }}:{{ qbittorrent_container_torrenting_port }} \
+      {% if qbittorrent_container_torrenting_host_bind_port %}
+      -p {{ qbittorrent_container_torrenting_host_bind_port }}:{{ qbittorrent_container_torrenting_port }} \
       {% endif %}
-      {% if qbittorrent_container_torrenting_bind_port %}
-      -p {{ qbittorrent_container_torrenting_bind_port }}:{{ qbittorrent_container_torrenting_port }}/udp \
+      {% if qbittorrent_container_torrenting_host_bind_port %}
+      -p {{ qbittorrent_container_torrenting_host_bind_port }}:{{ qbittorrent_container_torrenting_port }}/udp \
       {% endif %}
       --env-file={{ qbittorrent_base_path }}/env \
       --label-file={{ qbittorrent_base_path }}/labels \
