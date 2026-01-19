@@ -27,11 +27,11 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --log-driver=none \
       --user={{ qbittorrent_uid }}:{{ qbittorrent_gid }} \
       --cap-drop=ALL \
-      --cap-add=SETUID \
-      --cap-add=SETGID \
       --cap-add=CHOWN \
-      --cap-add=FOWNER \
       --cap-add=DAC_OVERRIDE \
+      --cap-add=FOWNER \
+      --cap-add=SETGID \
+      --cap-add=SETUID \
       --read-only \
       --network={{ qbittorrent_container_network }} \
       {% if qbittorrent_container_http_host_bind_port %}
