@@ -45,6 +45,9 @@ qbittorrent_container_image_force_pull: "{{ qbittorrent_container_image.endswith
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 qbittorrent_container_network: "{{ qbittorrent_identifier }}"
 
+# Control if the container network is deleted on uninstalling.
+qbittorrent_container_network_deletion_enabled: true
+
 # Specify how the container publishes its HTTP port (as defined by `qbittorrent_container_http_port`).
 # Can be used to access the web UI directly (bypassing Traefik)
 #
