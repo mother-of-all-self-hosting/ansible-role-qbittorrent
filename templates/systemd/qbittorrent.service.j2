@@ -18,8 +18,7 @@ Wants={{ service }}
 [Service]
 Type=simple
 Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
-ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop -t {{ qbittorrent_container_stop_grace_time_seconds }} {{ qbittorrent_identifier }} 2>/dev/null || true'
-ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ qbittorrent_identifier }} 2>/dev/null || true'
+ExecStartPre={{ devture_systemd_docker_base_host_command_sh }} -c 'i=0; while [ "$i" -lt 10 ]; do {{ devture_systemd_docker_base_host_command_docker }} rm -f {{ qbittorrent_identifier }} >/dev/null 2>&1 || true; if ! {{ devture_systemd_docker_base_host_command_docker }} inspect {{ qbittorrent_identifier }} >/dev/null 2>&1; then exit 0; fi; i=$((i + 1)); sleep 1; done; echo "Failed to remove stale container {{ qbittorrent_identifier }}" >&2; exit 1'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --rm \
@@ -27,21 +26,21 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --log-driver=none \
       --user={{ qbittorrent_uid }}:{{ qbittorrent_gid }} \
       --cap-drop=ALL \
-      --cap-add=CHOWN \
-      --cap-add=DAC_OVERRIDE \
-      --cap-add=FOWNER \
-      --cap-add=SETGID \
       --cap-add=SETUID \
+      --cap-add=SETGID \
+      --cap-add=CHOWN \
+      --cap-add=FOWNER \
+      --cap-add=DAC_OVERRIDE \
       --read-only \
       --network={{ qbittorrent_container_network }} \
-      {% if qbittorrent_container_http_host_bind_port %}
-      -p {{ qbittorrent_container_http_host_bind_port }}:{{ qbittorrent_container_http_port }} \
+      {% if qbittorrent_container_webui_bind_port %}
+      -p {{ qbittorrent_container_webui_bind_port }}:{{ qbittorrent_container_webui_port }} \
       {% endif %}
-      {% if qbittorrent_container_torrenting_host_bind_port %}
-      -p {{ qbittorrent_container_torrenting_host_bind_port }}:{{ qbittorrent_container_torrenting_port }} \
+      {% if qbittorrent_container_torrenting_bind_port %}
+      -p {{ qbittorrent_container_torrenting_bind_port }}:{{ qbittorrent_container_torrenting_port }} \
       {% endif %}
-      {% if qbittorrent_container_torrenting_host_bind_port %}
-      -p {{ qbittorrent_container_torrenting_host_bind_port }}:{{ qbittorrent_container_torrenting_port }}/udp \
+      {% if qbittorrent_container_torrenting_bind_port %}
+      -p {{ qbittorrent_container_torrenting_bind_port }}:{{ qbittorrent_container_torrenting_port }}/udp \
       {% endif %}
       --env-file={{ qbittorrent_base_path }}/env \
       --label-file={{ qbittorrent_base_path }}/labels \
@@ -51,7 +50,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
       {% endfor %}
       # https://docs.linuxserver.io/misc/read-only/#how
-      --tmpfs=/run:rw,exec,nosuid,size={{ qbittorrent_container_tmpfs_run_size }} \
+      --tmpfs=/run:rw,exec,nosuid,size=128m \
       {% for arg in qbittorrent_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}
