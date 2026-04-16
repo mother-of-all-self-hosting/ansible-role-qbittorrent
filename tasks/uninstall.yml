@@ -32,14 +32,14 @@
         - env
         - labels
 
-    - name: Ensure qBittorrent local data path if empty
+    - name: Ensure qBittorrent local data path does not exist if empty
       ansible.builtin.command:
         cmd: "rmdir {{ qbittorrent_data_path }}"
       register: qbittorrent_data_path_deletion_result
       changed_when: qbittorrent_data_path_deletion_result.rc == 0
       failed_when: false
 
-    - name: Ensure qBittorrent local download data path if empty
+    - name: Ensure qBittorrent local download data path does not exist if empty
       ansible.builtin.command:
         cmd: "rmdir {{ qbittorrent_download_path }}"
       register: qbittorrent_download_path_deletion_result
