@@ -40,7 +40,6 @@ qbittorrent_container_image_tag: "{{ qbittorrent_version }}"
 qbittorrent_container_image_registry_prefix: "{{ qbittorrent_container_image_registry_prefix_upstream }}"
 qbittorrent_container_image_registry_prefix_upstream: "{{ qbittorrent_container_image_registry_prefix_upstream_default }}"
 qbittorrent_container_image_registry_prefix_upstream_default: lscr.io/
-qbittorrent_container_image_force_pull: "{{ qbittorrent_container_image.endswith(':latest') }}"
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 qbittorrent_container_network: "{{ qbittorrent_identifier }}"

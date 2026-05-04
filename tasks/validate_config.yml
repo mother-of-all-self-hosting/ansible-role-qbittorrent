@@ -15,6 +15,7 @@
     - { "old": "qbittorrent_container_webui_bind_port", "new": "qbittorrent_container_http_host_bind_port" }
     - { "old": "qbittorrent_container_webui_port", "new": "qbittorrent_container_http_port" }
     - { "old": "qbittorrent_container_additional_environment_variables", "new": "qbittorrent_environment_variables_additional_variables" }
+    - { "old": "qbittorrent_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
 - name: Fail if required qBittorrent settings not defined
   ansible.builtin.fail:
