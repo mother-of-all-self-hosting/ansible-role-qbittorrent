@@ -1,7 +1,9 @@
 ---
 galaxy_info:
   author: spatterlight
+  company: mash
   role_name: qbittorrent
+  namespace: mash
   description: An Ansible role for installing qBittorrent, a bittorrent client programmed in C++ / Qt that uses libtorrent
   platforms:
     - name: Debian
