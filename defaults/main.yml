@@ -13,7 +13,7 @@
 qbittorrent_enabled: true
 
 qbittorrent_identifier: qbittorrent
-qbittorrent_base_path: "{{ qbittorrent_identifier }}"
+qbittorrent_base_path: "/{{ qbittorrent_identifier }}"
 qbittorrent_data_path: "{{ qbittorrent_base_path }}/data"
 # The path where downloaded files will be stored on the host system
 qbittorrent_download_path: "{{ qbittorrent_base_path }}/downloads"
