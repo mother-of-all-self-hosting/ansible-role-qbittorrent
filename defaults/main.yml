@@ -41,6 +41,11 @@ qbittorrent_container_image_registry_prefix: "{{ qbittorrent_container_image_reg
 qbittorrent_container_image_registry_prefix_upstream: "{{ qbittorrent_container_image_registry_prefix_upstream_default }}"
 qbittorrent_container_image_registry_prefix_upstream_default: lscr.io/
 
+# The hostname to assign to the container (its `--hostname`).
+# Pinned to a stable value, because Docker otherwise randomizes it on each (re)creation,
+# which prevents qBittorrent from recovering from a stale `lockfile` left by an unclean shutdown.
+qbittorrent_container_hostname: "{{ qbittorrent_identifier }}"
+
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 qbittorrent_container_network: "{{ qbittorrent_identifier }}"
 

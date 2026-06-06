@@ -23,6 +23,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_sh }} -c '{{ qbittorren
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --rm \
       --name={{ qbittorrent_identifier }} \
+      --hostname={{ qbittorrent_container_hostname }} \
       --log-driver=none \
       --user={{ qbittorrent_uid }}:{{ qbittorrent_gid }} \
       --cap-drop=ALL \
