@@ -101,6 +101,9 @@ qbittorrent_container_labels_traefik_priority: 0
 qbittorrent_container_labels_traefik_entrypoints: web-secure
 qbittorrent_container_labels_traefik_tls: "{{ qbittorrent_container_labels_traefik_entrypoints != 'web' }}"
 qbittorrent_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+qbittorrent_container_labels_traefik_middleware_basic_auth_enabled: false
+# See: https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/basicauth/
+qbittorrent_container_labels_traefik_middleware_basic_auth_users: ""
 
 # qbittorrent_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
 # See `../templates/labels.j2` for details.

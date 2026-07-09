@@ -13,6 +13,11 @@ traefik.docker.network={{ qbittorrent_container_labels_traefik_docker_network }}
 
 {% set middlewares = [] %}
 
+{% if qbittorrent_container_labels_traefik_middleware_basic_auth_enabled %}
+{% set middlewares = middlewares + [qbittorrent_identifier + '-basic-auth'] %}
+traefik.http.middlewares.{{ qbittorrent_identifier }}-basic-auth.basicauth.users={{ qbittorrent_container_labels_traefik_middleware_basic_auth_users }}
+{% endif %}
+
 {% if qbittorrent_container_labels_traefik_path_prefix != '/' %}
 traefik.http.middlewares.{{ qbittorrent_identifier }}-slashless-redirect.redirectregex.regex=^({{ qbittorrent_container_labels_traefik_path_prefix | quote }})$
 traefik.http.middlewares.{{ qbittorrent_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
