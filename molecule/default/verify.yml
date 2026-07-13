@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify qBittorrent systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for qBittorrent service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: qbittorrent.service
+      register: qbittorrent_service
+      until: qbittorrent_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert qBittorrent service is active
+      ansible.builtin.assert:
+        that: qbittorrent_service.status.ActiveState == 'active'
+        fail_msg: "qbittorrent.service not active ({{ qbittorrent_service.status.ActiveState }})"
+        success_msg: "qbittorrent.service is active"
+
+    - name: Wait for qBittorrent HTTP endpoint to respond (up to 10m)
+      ansible.builtin.uri:
+        url: "http://localhost:8080/"
+        method: GET
+        status_code: [200, 302]
+        follow_redirects: none
+      register: qbittorrent_endpoint
+      until: qbittorrent_endpoint.status in [200, 302]
+      retries: 120
+      delay: 5
+
+    - name: Assert qBittorrent HTTP endpoint responds
+      ansible.builtin.assert:
+        that: qbittorrent_endpoint.status in [200, 302]
+        fail_msg: "qBittorrent did not respond as expected ({{ qbittorrent_endpoint.status | default('no response') }})"
+        success_msg: "qBittorrent responded with {{ qbittorrent_endpoint.status }}"
+
+    - name: Show qBittorrent systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "qBittorrent systemd: {{ qbittorrent_service.status.ActiveState }}"
+          - "qBittorrent HTTP: {{ qbittorrent_endpoint.status }}"

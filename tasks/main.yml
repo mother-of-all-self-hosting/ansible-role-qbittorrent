@@ -21,6 +21,7 @@
 - name: Perform tasks to print temporary password for qBittorrent
   when: qbittorrent_enabled | bool
   tags:
+    - molecule-notest
     - print-qbittorrent-password
   block:
     - name: Run qBittorrent print temporary password tasks
