@@ -23,6 +23,12 @@
         fail_msg: "qbittorrent.service not active ({{ qbittorrent_service.status.ActiveState }})"
         success_msg: "qbittorrent.service is active"
 
+    - name: Retrieve qBittorrent service log for debugging
+      when: qbittorrent_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu qbittorrent.service
+      changed_when: false
+
     - name: Wait for qBittorrent HTTP endpoint to respond (up to 10m)
       ansible.builtin.uri:
         url: "http://localhost:8080/"
