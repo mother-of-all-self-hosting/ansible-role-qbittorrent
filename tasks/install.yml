@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 spatterlight
+# SPDX-FileCopyrightText: 2026 sudo-Tiz
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -27,6 +28,33 @@
     - env
     - labels
   register: qbittorrent_support_files_result
+
+- name: Ensure qBittorrent custom configuration is applied
+  when: "qbittorrent_config_custom | length > 0"
+  block:
+    - name: Ensure qBittorrent configuration directory exists
+      ansible.builtin.file:
+        path: "{{ qbittorrent_data_path }}/qBittorrent"
+        state: directory
+        mode: "0750"
+        owner: "{{ qbittorrent_uid }}"
+        group: "{{ qbittorrent_gid }}"
+
+    - name: Ensure qBittorrent custom configuration options are applied
+      community.general.ini_file:
+        path: "{{ qbittorrent_data_path }}/qBittorrent/qBittorrent.conf"
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+        create: true
+        no_extra_spaces: true
+        owner: "{{ qbittorrent_uid }}"
+        group: "{{ qbittorrent_gid }}"
+        mode: "0640"
+      loop: "{{ qbittorrent_config_custom }}"
+      loop_control:
+        label: "[{{ item.section }}] {{ item.option }}"
+      register: qbittorrent_config_custom_result
 
 - name: Ensure qBittorrent container image is pulled via community.docker.docker_image_pull
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
@@ -84,4 +112,5 @@
         or qbittorrent_systemd_service_result.changed | default(false)
         or qbittorrent_container_image_pull_result_ansible_module.changed | default(false)
         or qbittorrent_container_image_pull_result_command.changed | default(false)
+        or qbittorrent_config_custom_result.changed | default(false)
       }}
