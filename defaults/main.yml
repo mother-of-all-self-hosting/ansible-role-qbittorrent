@@ -16,6 +16,10 @@ qbittorrent_enabled: true
 qbittorrent_identifier: qbittorrent
 qbittorrent_base_path: "/{{ qbittorrent_identifier }}"
 qbittorrent_data_path: "{{ qbittorrent_base_path }}/data"
+# The path where qBittorrent keeps its own configuration (`qBittorrent.conf`, etc.)
+qbittorrent_config_path: "{{ qbittorrent_data_path }}/qBittorrent"
+# The path to qBittorrent's own configuration file
+qbittorrent_config_file_path: "{{ qbittorrent_config_path }}/qBittorrent.conf"
 # The path where downloaded files will be stored on the host system
 qbittorrent_download_path: "{{ qbittorrent_base_path }}/downloads"
 # The path at which qbittorrent_download_path is mounted to inside the container

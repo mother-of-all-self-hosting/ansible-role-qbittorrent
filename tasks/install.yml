@@ -15,6 +15,7 @@
   with_items:
     - "{{ qbittorrent_base_path }}"
     - "{{ qbittorrent_data_path }}"
+    - "{{ qbittorrent_config_path }}"
     - "{{ qbittorrent_download_path }}"
 
 - name: Ensure qBittorrent support files installed
@@ -32,17 +33,9 @@
 - name: Ensure qBittorrent configuration overrides are applied
   when: "qbittorrent_config_overrides | length > 0"
   block:
-    - name: Ensure qBittorrent configuration directory exists
-      ansible.builtin.file:
-        path: "{{ qbittorrent_data_path }}/qBittorrent"
-        state: directory
-        mode: "0750"
-        owner: "{{ qbittorrent_uid }}"
-        group: "{{ qbittorrent_gid }}"
-
     - name: Ensure qBittorrent configuration override options are applied
       community.general.ini_file:
-        path: "{{ qbittorrent_data_path }}/qBittorrent/qBittorrent.conf"
+        path: "{{ qbittorrent_config_file_path }}"
         section: "{{ item.section }}"
         option: "{{ item.option }}"
         value: "{{ item.value }}"
