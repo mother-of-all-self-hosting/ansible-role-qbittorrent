@@ -213,6 +213,10 @@ qbittorrent_config_preferences_webui_host_header_validation: "{{ 'false' if qbit
 # by hand via the Web UI, the next playbook run reverts them back to what's
 # defined here).
 #
+# Removing an entry from here does not restore the previous value of the
+# setting - it merely stops the role from enforcing it. To go back to a
+# different value, either define that value here or change it via the Web UI.
+#
 # qBittorrent reads this file at startup, keeps all settings in memory and
 # rewrites the whole file from memory on a clean shutdown. The role therefore
 # only modifies the file while the qBittorrent service is stopped - stopping it
