@@ -46,6 +46,44 @@
         fail_msg: "qBittorrent did not respond as expected ({{ qbittorrent_endpoint.status | default('no response') }})"
         success_msg: "qBittorrent responded with {{ qbittorrent_endpoint.status }}"
 
+    # qBittorrent rewrites its configuration file from memory on a clean shutdown,
+    # so configuration overrides which had been applied while the service was running
+    # would get discarded when the service is stopped.
+    # We restart the service here to make sure that our overrides survive such a cycle.
+    - name: Ensure qBittorrent systemd service is restarted
+      ansible.builtin.systemd_service:
+        name: qbittorrent.service
+        state: restarted
+
+    - name: Wait for qBittorrent HTTP endpoint to respond after the restart (up to 10m)
+      ansible.builtin.uri:
+        url: "http://localhost:8080/"
+        method: GET
+        status_code: [200, 302]
+        follow_redirects: none
+      register: qbittorrent_endpoint_after_restart
+      until: qbittorrent_endpoint_after_restart.status in [200, 302]
+      retries: 120
+      delay: 5
+
+    - name: Retrieve qBittorrent configuration file
+      ansible.builtin.slurp:
+        src: /qbittorrent/data/qBittorrent/qBittorrent.conf
+      register: qbittorrent_config_file
+
+    - name: Assert qBittorrent configuration overrides survived a service restart
+      ansible.builtin.assert:
+        that: item in (qbittorrent_config_file.content | b64decode)
+        fail_msg: "qBittorrent configuration does not contain `{{ item }}`"
+        success_msg: "qBittorrent configuration contains `{{ item }}`"
+      with_items:
+        # From `qbittorrent_config_overrides_custom`
+        - "Session\\MaxActiveDownloads=7"
+        # From `qbittorrent_config_overrides_default`
+        - "Session\\DefaultSavePath=/downloads/"
+        # From `qbittorrent_config_overrides_default`. Traefik is disabled in this scenario.
+        - "WebUI\\HostHeaderValidation=true"
+
     - name: Show qBittorrent systemd service status summary
       ansible.builtin.debug:
         msg:

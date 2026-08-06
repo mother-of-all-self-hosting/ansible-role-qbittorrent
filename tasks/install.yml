@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 spatterlight
+# SPDX-FileCopyrightText: 2026 sudo-Tiz
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -14,6 +15,7 @@
   with_items:
     - "{{ qbittorrent_base_path }}"
     - "{{ qbittorrent_data_path }}"
+    - "{{ qbittorrent_config_path }}"
     - "{{ qbittorrent_download_path }}"
 
 - name: Ensure qBittorrent support files installed
@@ -75,6 +77,76 @@
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ qbittorrent_identifier }}.service"
     mode: "0644"
   register: qbittorrent_systemd_service_result
+
+# qBittorrent reads `qBittorrent.conf` at startup, keeps all settings in memory
+# and rewrites the whole file from memory on a clean shutdown.
+# Modifying the file while the service is running is therefore pointless -
+# the changes get discarded the moment the service is stopped.
+#
+# We thus only touch the file while the service is stopped, restoring the
+# service to the state it was in afterwards.
+- name: Ensure qBittorrent configuration overrides are applied
+  when: "qbittorrent_config_overrides | length > 0"
+  block:
+    # See the note about `mode` below.
+    - name: Check if qBittorrent configuration override options need applying  # noqa risky-file-permissions
+      community.general.ini_file:
+        path: "{{ qbittorrent_config_file_path }}"
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+        create: true
+        no_extra_spaces: true
+        owner: "{{ qbittorrent_uid }}"
+        group: "{{ qbittorrent_gid }}"
+      check_mode: true
+      loop: "{{ qbittorrent_config_overrides }}"
+      loop_control:
+        label: "[{{ item.section }}] {{ item.option }}"
+      register: qbittorrent_config_overrides_check_result
+
+    - name: Determine whether qBittorrent configuration overrides need applying
+      ansible.builtin.set_fact:
+        qbittorrent_config_overrides_changes_necessary: "{{ qbittorrent_config_overrides_check_result.changed | default(false) }}"
+
+    - name: Apply qBittorrent configuration overrides
+      when: qbittorrent_config_overrides_changes_necessary | bool
+      block:
+        - name: Populate service facts
+          ansible.builtin.service_facts:
+
+        - name: Determine whether the qBittorrent systemd service is running
+          ansible.builtin.set_fact:
+            qbittorrent_service_was_running: "{{ ansible_facts.services[qbittorrent_identifier + '.service'] | default(none) is not none and ansible_facts.services[qbittorrent_identifier + '.service'].state == 'running' }}"
+
+        - name: Ensure qBittorrent systemd service is stopped before applying configuration overrides
+          when: qbittorrent_service_was_running | bool
+          ansible.builtin.systemd_service:
+            name: "{{ qbittorrent_identifier }}.service"
+            state: stopped
+
+        # We intentionally do not enforce a `mode` here (hence the `noqa` below).
+        # qBittorrent recreates this file with its own permissions, so enforcing a mode
+        # would make this task report a change on every playbook run.
+        - name: Ensure qBittorrent configuration override options are applied  # noqa risky-file-permissions
+          community.general.ini_file:
+            path: "{{ qbittorrent_config_file_path }}"
+            section: "{{ item.section }}"
+            option: "{{ item.option }}"
+            value: "{{ item.value }}"
+            create: true
+            no_extra_spaces: true
+            owner: "{{ qbittorrent_uid }}"
+            group: "{{ qbittorrent_gid }}"
+          loop: "{{ qbittorrent_config_overrides }}"
+          loop_control:
+            label: "[{{ item.section }}] {{ item.option }}"
+
+        - name: Ensure qBittorrent systemd service is started back after applying configuration overrides
+          when: qbittorrent_service_was_running | bool
+          ansible.builtin.systemd_service:
+            name: "{{ qbittorrent_identifier }}.service"
+            state: started
 
 - name: Determine whether qBittorrent needs a restart
   ansible.builtin.set_fact:
