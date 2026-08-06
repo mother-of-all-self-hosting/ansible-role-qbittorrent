@@ -33,7 +33,12 @@
 - name: Ensure qBittorrent configuration overrides are applied
   when: "qbittorrent_config_overrides | length > 0"
   block:
-    - name: Ensure qBittorrent configuration override options are applied
+    # We intentionally do not enforce a `mode` here (hence the `noqa` below).
+    # qBittorrent rewrites this file itself (see the note about clean shutdowns
+    # in `defaults/main.yml`) and recreates it with its own permissions, so
+    # enforcing a mode would make this task report a change on every playbook run,
+    # which would in turn restart the service on every playbook run.
+    - name: Ensure qBittorrent configuration override options are applied  # noqa risky-file-permissions
       community.general.ini_file:
         path: "{{ qbittorrent_config_file_path }}"
         section: "{{ item.section }}"
@@ -43,7 +48,6 @@
         no_extra_spaces: true
         owner: "{{ qbittorrent_uid }}"
         group: "{{ qbittorrent_gid }}"
-        mode: "0640"
       loop: "{{ qbittorrent_config_overrides }}"
       loop_control:
         label: "[{{ item.section }}] {{ item.option }}"
