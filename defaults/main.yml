@@ -203,10 +203,11 @@ qbittorrent_environment_variables_additional_variables: ""
 # by hand via the Web UI, the next playbook run reverts them back to what's
 # defined here).
 #
-# IMPORTANT: qBittorrent only reads this file at startup and only writes it
-# back to disk on a clean shutdown. Changes here only take effect the next
-# time the qbittorrent systemd service is (re)started (a normal
-# `just install-all` / `just setup-all` run takes care of this automatically).
+# qBittorrent reads this file at startup, keeps all settings in memory and
+# rewrites the whole file from memory on a clean shutdown. The role therefore
+# only modifies the file while the qBittorrent service is stopped - stopping it
+# first if necessary and starting it back up afterwards, so that it's left in
+# the state it was found in.
 #
 # Example:
 # qbittorrent_config_overrides_custom:
