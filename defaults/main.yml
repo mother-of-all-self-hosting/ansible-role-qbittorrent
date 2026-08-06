@@ -186,6 +186,16 @@ qbittorrent_environment_variables_tz: 'Etc/UTC'
 #   ANOTHER=value
 qbittorrent_environment_variables_additional_variables: ""
 
+# The path (as seen from within the container) where qBittorrent saves downloads by default.
+# This is fed to `qbittorrent_config_overrides_default` (see below).
+qbittorrent_config_bittorrent_session_default_save_path: "{{ qbittorrent_download_bind_path }}/"
+
+# Controls whether qBittorrent validates the `Host` header of Web UI requests.
+# This needs to be disabled when qBittorrent is served via a reverse-proxy,
+# unless the reverse-proxy passes the expected `Host` header along.
+# This is fed to `qbittorrent_config_overrides_default` (see below).
+qbittorrent_config_preferences_webui_host_header_validation: "{{ 'false' if qbittorrent_container_labels_traefik_enabled | bool else 'true' }}"
+
 # qbittorrent_config_overrides lets you set specific keys in qBittorrent's own
 # `qBittorrent.conf` file, without touching any other settings in it (things
 # you configure via the Web UI - categories, RSS feeds, trackers, statistics,
@@ -218,7 +228,13 @@ qbittorrent_environment_variables_additional_variables: ""
 #     option: Session\DefaultSavePath
 #     value: /downloads/
 qbittorrent_config_overrides: "{{ qbittorrent_config_overrides_default + qbittorrent_config_overrides_auto + qbittorrent_config_overrides_custom }}"
-qbittorrent_config_overrides_default: []
+qbittorrent_config_overrides_default:
+  - section: BitTorrent
+    option: Session\DefaultSavePath
+    value: "{{ qbittorrent_config_bittorrent_session_default_save_path }}"
+  - section: Preferences
+    option: WebUI\HostHeaderValidation
+    value: "{{ qbittorrent_config_preferences_webui_host_header_validation }}"
 qbittorrent_config_overrides_auto: []
 qbittorrent_config_overrides_custom: []
 
