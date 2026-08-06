@@ -182,7 +182,7 @@ qbittorrent_environment_variables_tz: 'Etc/UTC'
 #   ANOTHER=value
 qbittorrent_environment_variables_additional_variables: ""
 
-# qbittorrent_config_custom lets you set specific keys in qBittorrent's own
+# qbittorrent_config_overrides lets you set specific keys in qBittorrent's own
 # `qBittorrent.conf` file, without touching any other settings in it (things
 # you configure via the Web UI - categories, RSS feeds, trackers, statistics,
 # etc. - are left alone).
@@ -190,6 +190,10 @@ qbittorrent_environment_variables_additional_variables: ""
 # Each entry is a `section`/`option`/`value` triplet, matching the actual INI
 # file structure. Give values as strings, matching exactly what qBittorrent
 # itself would write to the file.
+#
+# Entries are applied in order, so if the same `section`/`option` is defined
+# more than once, the last one wins. Because of the order below, this means
+# that `_custom` overrides `_auto`, which overrides `_default`.
 #
 # These settings are enforced on every playbook run (i.e. if you change them
 # by hand via the Web UI, the next playbook run reverts them back to what's
@@ -201,20 +205,17 @@ qbittorrent_environment_variables_additional_variables: ""
 # `just install-all` / `just setup-all` run takes care of this automatically).
 #
 # Example:
-# qbittorrent_config_custom:
+# qbittorrent_config_overrides_custom:
 #   - section: Preferences
 #     option: WebUI\Address
 #     value: "*"
-#   - section: Preferences
-#     option: WebUI\HostHeaderValidation
-#     value: "false"
 #   - section: BitTorrent
 #     option: Session\DefaultSavePath
 #     value: /downloads/
-#   - section: LegalNotice
-#     option: Accepted
-#     value: "true"
-qbittorrent_config_custom: []
+qbittorrent_config_overrides: "{{ qbittorrent_config_overrides_default + qbittorrent_config_overrides_auto + qbittorrent_config_overrides_custom }}"
+qbittorrent_config_overrides_default: []
+qbittorrent_config_overrides_auto: []
+qbittorrent_config_overrides_custom: []
 
 # qbittorrent_restart_necessary controls whether the qBittorrent systemd
 # service will be restarted (when true) or merely started (when false) by the

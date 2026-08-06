@@ -29,8 +29,8 @@
     - labels
   register: qbittorrent_support_files_result
 
-- name: Ensure qBittorrent custom configuration is applied
-  when: "qbittorrent_config_custom | length > 0"
+- name: Ensure qBittorrent configuration overrides are applied
+  when: "qbittorrent_config_overrides | length > 0"
   block:
     - name: Ensure qBittorrent configuration directory exists
       ansible.builtin.file:
@@ -40,7 +40,7 @@
         owner: "{{ qbittorrent_uid }}"
         group: "{{ qbittorrent_gid }}"
 
-    - name: Ensure qBittorrent custom configuration options are applied
+    - name: Ensure qBittorrent configuration override options are applied
       community.general.ini_file:
         path: "{{ qbittorrent_data_path }}/qBittorrent/qBittorrent.conf"
         section: "{{ item.section }}"
@@ -51,10 +51,10 @@
         owner: "{{ qbittorrent_uid }}"
         group: "{{ qbittorrent_gid }}"
         mode: "0640"
-      loop: "{{ qbittorrent_config_custom }}"
+      loop: "{{ qbittorrent_config_overrides }}"
       loop_control:
         label: "[{{ item.section }}] {{ item.option }}"
-      register: qbittorrent_config_custom_result
+      register: qbittorrent_config_overrides_result
 
 - name: Ensure qBittorrent container image is pulled via community.docker.docker_image_pull
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
@@ -112,5 +112,5 @@
         or qbittorrent_systemd_service_result.changed | default(false)
         or qbittorrent_container_image_pull_result_ansible_module.changed | default(false)
         or qbittorrent_container_image_pull_result_command.changed | default(false)
-        or qbittorrent_config_custom_result.changed | default(false)
+        or qbittorrent_config_overrides_result.changed | default(false)
       }}
