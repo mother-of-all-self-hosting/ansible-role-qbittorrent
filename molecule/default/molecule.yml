@@ -37,6 +37,10 @@ provisioner:
         qbittorrent_hostname: localhost
         qbittorrent_container_labels_traefik_enabled: false
         qbittorrent_container_http_host_bind_port: 8080
+        qbittorrent_config_overrides_custom:
+          - section: BitTorrent
+            option: Session\MaxActiveDownloads
+            value: "7"
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
