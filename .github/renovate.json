@@ -1,6 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>mother-of-all-self-hosting/renovate-config#v1.0.0"
+    "github>mother-of-all-self-hosting/renovate-config#v1.0.0",
+    "github>mother-of-all-self-hosting/renovate-config//patch-automerge#v1.0.0"
+  ],
+  "packageRules": [
+    {
+      "description": "The image publishes each qBittorrent release in two libtorrent flavors (5.2.3-1 for 1.2.x, 5.2.3-lt2-1 for 2.0.x) plus a trailing image-revision number that occasionally increments on its own (base image rebuilds). This versioning keeps Renovate within the lt2 family and lets it offer those revision-only rebuilds too, which plain docker versioning would skip.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["qbittorrentofficial/qbittorrent-nox"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-lt2-(?<build>\\d+)$"
+    }
   ]
 }
