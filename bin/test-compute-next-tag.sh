@@ -46,7 +46,7 @@ scenario() {
 	git config user.name 'Test'
 	git config commit.gpgsign false
 
-	printf 'qbittorrent_version: 5.2.1\n' > defaults/main.yml
+	printf 'qbittorrent_container_image_tag: 5.2.1-lt2-1\n' > defaults/main.yml
 	printf 'placeholder\n' > tasks/main.yml
 	printf 'placeholder\n' > templates/env.j2
 	printf 'placeholder\n' > README.md
@@ -89,9 +89,11 @@ expect() {
 	fi
 }
 
-bump_version="sed -i 's|qbittorrent_version: 5.2.1|qbittorrent_version: 5.3.0|' defaults/main.yml"
-revert_version="sed -i 's|qbittorrent_version: 5.3.0|qbittorrent_version: 5.2.1|' defaults/main.yml"
-prefix_version="sed -i 's|qbittorrent_version: 5.2.1|qbittorrent_version: v5.3.0|' defaults/main.yml"
+bump_version="sed -i 's|qbittorrent_container_image_tag: 5.2.1-lt2-1|qbittorrent_container_image_tag: 5.3.0-lt2-1|' defaults/main.yml"
+revert_version="sed -i 's|qbittorrent_container_image_tag: 5.3.0-lt2-1|qbittorrent_container_image_tag: 5.2.1-lt2-1|' defaults/main.yml"
+prefix_version="sed -i 's|qbittorrent_container_image_tag: 5.2.1-lt2-1|qbittorrent_container_image_tag: v5.3.0-lt2-1|' defaults/main.yml"
+revision_bump="sed -i 's|qbittorrent_container_image_tag: 5.2.1-lt2-1|qbittorrent_container_image_tag: 5.2.1-lt2-2|' defaults/main.yml"
+plain_flavor="sed -i 's|qbittorrent_container_image_tag: 5.2.1-lt2-1|qbittorrent_container_image_tag: 5.3.0-1|' defaults/main.yml"
 edit_task="printf 'a task\n' >> tasks/main.yml"
 edit_template="printf 'a line\n' >> templates/env.j2"
 edit_readme="printf 'documentation\n' >> README.md"
@@ -132,6 +134,12 @@ expect 'a revert' v5.2.1-2 "$(merge "$revert_version && $edit_task")"
 
 scenario 'A version value carrying a leading v does not double it in the tag'
 expect 'version bump' v5.3.0-0 "$(merge "$prefix_version")"
+
+scenario 'An image-revision-only bump rolls the release counter'
+expect 'revision bump' v5.2.1-2 "$(merge "$revision_bump")"
+
+scenario 'A plain (non-lt2) tag flavor still yields the bare version'
+expect 'flavor + bump' v5.3.0-0 "$(merge "$plain_flavor")"
 
 if [ "$failures" -gt 0 ]; then
 	echo >&2 "$failures scenario(s) behaved unexpectedly"

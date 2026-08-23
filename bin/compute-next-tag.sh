@@ -38,12 +38,20 @@ role_defining_paths=(
 	'templates'
 )
 
-version="$(sed -nE 's|^qbittorrent_version:[[:space:]]*"?([^"[:space:]]+)"?.*$|\1|p' "$defaults_path" | head -n1)"
+# qbittorrent_version in defaults/main.yml is a Jinja expression derived from
+# the image tag, so the tag variable (a plain literal, and the value Renovate
+# actually bumps) is what gets read here. Image tags look like `5.2.1-lt2-1`
+# (qBittorrent version, libtorrent flavor, image revision); the qBittorrent
+# version is what names the release, so the suffixes are stripped - an
+# image-revision-only bump then rolls this tag's release counter.
+image_tag="$(sed -nE 's|^qbittorrent_container_image_tag:[[:space:]]*"?([^"[:space:]]+)"?.*$|\1|p' "$defaults_path" | head -n1)"
 
-if [ -z "$version" ]; then
-	echo >&2 "Could not determine the qBittorrent version from $defaults_path"
+if [ -z "$image_tag" ]; then
+	echo >&2 "Could not determine the qBittorrent image tag from $defaults_path"
 	exit 1
 fi
+
+version="$(printf '%s' "$image_tag" | sed -E -e 's|-lt2-[0-9]+$||' -e 's|-[0-9]+$||')"
 
 # The version values do not carry a leading `v` (e.g. `5.2.1`), but the tags
 # do (`v5.2.1-0`). Stripping any `v` before prepending one keeps this correct
