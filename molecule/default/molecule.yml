@@ -41,6 +41,18 @@ provisioner:
           - section: BitTorrent
             option: Session\MaxActiveDownloads
             value: "7"
+          # qBittorrent generates a random Web UI password on first run and
+          # only prints it to its log, so there is no password the verifier
+          # could log in with. Whitelisting the whole address space lets the
+          # verifier reach the Web UI API without authenticating - which
+          # doubles as a check that the role's configuration overrides reach
+          # the running process, since the API answers 403 without them.
+          - section: Preferences
+            option: WebUI\AuthSubnetWhitelistEnabled
+            value: "true"
+          - section: Preferences
+            option: WebUI\AuthSubnetWhitelist
+            value: 0.0.0.0/0
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles

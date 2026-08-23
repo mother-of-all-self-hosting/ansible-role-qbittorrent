@@ -1,14 +1,28 @@
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 # SPDX-FileCopyrightText: 2026 spatterlight
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify qBittorrent systemd service
+- name: Verify qBittorrent
   hosts: all
   become: true
   gather_facts: false
+
+  vars:
+    qbittorrent_verify_base_url: "http://localhost:8080"
+
   tasks:
+    # The role is not included in this playbook, so its defaults are not in
+    # scope. Reading defaults/main.yml directly keeps the version assertion
+    # below tied to the value the role ships, with nothing to keep in sync in
+    # this scenario. include_vars reads from the controller.
+    - name: Load the qBittorrent role defaults
+      ansible.builtin.include_vars:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+        name: qbittorrent_defaults
+
     - name: Wait for qBittorrent service to become active (up to 180s)
       ansible.builtin.systemd:
         name: qbittorrent.service
@@ -29,22 +43,67 @@
         cmd: journalctl -xeu qbittorrent.service
       changed_when: false
 
-    - name: Wait for qBittorrent HTTP endpoint to respond (up to 10m)
+    # The Web UI answers `/` with 200 even for callers that have not
+    # authenticated, so a 200 there proves nothing. The Web UI API does: it
+    # refuses unauthenticated callers with 403, unless the subnet whitelist
+    # that this scenario configures through the role's configuration overrides
+    # made it into the *running* process. A 200 here therefore shows both that
+    # qBittorrent is up and that the role's configuration handling took effect
+    # - and the body reports the version of the qBittorrent actually running.
+    - name: Wait for the qBittorrent Web UI API to report its version (up to 10m)
       ansible.builtin.uri:
-        url: "http://localhost:8080/"
+        url: "{{ qbittorrent_verify_base_url }}/api/v2/app/version"
         method: GET
-        status_code: [200, 302]
-        follow_redirects: none
-      register: qbittorrent_endpoint
-      until: qbittorrent_endpoint.status in [200, 302]
+        status_code: [200]
+        return_content: true
+      register: qbittorrent_api_version
+      until: qbittorrent_api_version.status == 200
       retries: 120
       delay: 5
 
-    - name: Assert qBittorrent HTTP endpoint responds
+    # The API reports the version with a leading `v` (`v5.2.1`), while the
+    # variable carries none. Upstream may append a suffix (release candidates
+    # and the like), so this is a prefix match rather than an equality check.
+    - name: Assert the running qBittorrent is the version this role installs
       ansible.builtin.assert:
-        that: qbittorrent_endpoint.status in [200, 302]
-        fail_msg: "qBittorrent did not respond as expected ({{ qbittorrent_endpoint.status | default('no response') }})"
-        success_msg: "qBittorrent responded with {{ qbittorrent_endpoint.status }}"
+        that: >-
+          (qbittorrent_api_version.content | trim | regex_replace('^v', '')).startswith(qbittorrent_defaults.qbittorrent_version)
+        fail_msg: >-
+          qBittorrent reports {{ qbittorrent_api_version.content | trim }},
+          expected {{ qbittorrent_defaults.qbittorrent_version }}
+        success_msg: "qBittorrent reports {{ qbittorrent_api_version.content | trim }}"
+
+    - name: Query the qBittorrent Web UI API version
+      ansible.builtin.uri:
+        url: "{{ qbittorrent_verify_base_url }}/api/v2/app/webapiVersion"
+        method: GET
+        status_code: [200]
+        return_content: true
+      register: qbittorrent_api_webapi_version
+
+    - name: Assert the qBittorrent Web UI API reports its own version
+      ansible.builtin.assert:
+        that: qbittorrent_api_webapi_version.content | trim is match('^[0-9]+\.[0-9]+')
+        fail_msg: "Unexpected Web UI API version: {{ qbittorrent_api_webapi_version.content | default('no content') }}"
+        success_msg: "qBittorrent Web UI API version is {{ qbittorrent_api_webapi_version.content | trim }}"
+
+    # `/api/v2/transfer/info` is answered out of the BitTorrent session rather
+    # than by the HTTP layer, so it only succeeds once libtorrent is actually
+    # up. The connection status itself is not asserted - it depends on what
+    # the CI network allows.
+    - name: Query the qBittorrent transfer info
+      ansible.builtin.uri:
+        url: "{{ qbittorrent_verify_base_url }}/api/v2/transfer/info"
+        method: GET
+        status_code: [200]
+        return_content: true
+      register: qbittorrent_api_transfer_info
+
+    - name: Assert the qBittorrent BitTorrent session is running
+      ansible.builtin.assert:
+        that: "'connection_status' in qbittorrent_api_transfer_info.json"
+        fail_msg: "qBittorrent did not report a transfer status"
+        success_msg: "qBittorrent's BitTorrent session is running"
 
     # qBittorrent rewrites its configuration file from memory on a clean shutdown,
     # so configuration overrides which had been applied while the service was running
@@ -55,22 +114,44 @@
         name: qbittorrent.service
         state: restarted
 
-    - name: Wait for qBittorrent HTTP endpoint to respond after the restart (up to 10m)
+    - name: Wait for the qBittorrent Web UI API to answer after the restart (up to 10m)
       ansible.builtin.uri:
-        url: "http://localhost:8080/"
+        url: "{{ qbittorrent_verify_base_url }}/api/v2/app/preferences"
         method: GET
-        status_code: [200, 302]
-        follow_redirects: none
-      register: qbittorrent_endpoint_after_restart
-      until: qbittorrent_endpoint_after_restart.status in [200, 302]
+        status_code: [200]
+        return_content: true
+      register: qbittorrent_api_preferences
+      until: qbittorrent_api_preferences.status == 200
       retries: 120
       delay: 5
+
+    # Reading the settings back out of the running qBittorrent, rather than out
+    # of the file on disk, is what shows that qBittorrent parsed and adopted
+    # them. `save_path` is reported without the trailing slash that the
+    # configuration value carries.
+    - name: Assert the running qBittorrent adopted the role's configuration overrides
+      ansible.builtin.assert:
+        that:
+          # From `qbittorrent_config_overrides_default`
+          - qbittorrent_api_preferences.json.save_path | regex_replace('/$', '') == '/downloads'
+          # From `qbittorrent_config_overrides_custom` (see molecule.yml)
+          - qbittorrent_api_preferences.json.max_active_downloads == 7
+          # From `qbittorrent_config_overrides_custom` (see molecule.yml)
+          - qbittorrent_api_preferences.json.bypass_auth_subnet_whitelist_enabled | bool
+        fail_msg: >-
+          qBittorrent did not adopt the configuration overrides
+          (save_path={{ qbittorrent_api_preferences.json.save_path | default('?') }},
+          max_active_downloads={{ qbittorrent_api_preferences.json.max_active_downloads | default('?') }})
+        success_msg: "The running qBittorrent reports the role's configuration overrides"
 
     - name: Retrieve qBittorrent configuration file
       ansible.builtin.slurp:
         src: /qbittorrent/data/qBittorrent/qBittorrent.conf
       register: qbittorrent_config_file
 
+    # `WebUI\HostHeaderValidation` is not exposed through the API, so it is
+    # checked in the file that qBittorrent rewrote from memory during the
+    # restart above - which still shows that the setting survived the cycle.
     - name: Assert qBittorrent configuration overrides survived a service restart
       ansible.builtin.assert:
         that: item in (qbittorrent_config_file.content | b64decode)
@@ -84,8 +165,9 @@
         # From `qbittorrent_config_overrides_default`. Traefik is disabled in this scenario.
         - "WebUI\\HostHeaderValidation=true"
 
-    - name: Show qBittorrent systemd service status summary
+    - name: Show qBittorrent verification summary
       ansible.builtin.debug:
         msg:
           - "qBittorrent systemd: {{ qbittorrent_service.status.ActiveState }}"
-          - "qBittorrent HTTP: {{ qbittorrent_endpoint.status }}"
+          - "qBittorrent version: {{ qbittorrent_api_version.content | trim }}"
+          - "qBittorrent Web UI API version: {{ qbittorrent_api_webapi_version.content | trim }}"
