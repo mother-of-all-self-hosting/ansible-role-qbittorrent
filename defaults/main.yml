@@ -46,7 +46,7 @@ qbittorrent_container_image: "{{ qbittorrent_container_image_registry_prefix }}q
 # libtorrent 1.2.x - switching an existing installation to them may force
 # torrent rechecks and affects BitTorrent-v2/hybrid torrents.
 # renovate: datasource=docker depName=qbittorrentofficial/qbittorrent-nox
-qbittorrent_container_image_tag: 5.2.1-lt2-1
+qbittorrent_container_image_tag: 5.2.3-lt2-1
 qbittorrent_container_image_registry_prefix: "{{ qbittorrent_container_image_registry_prefix_upstream }}"
 qbittorrent_container_image_registry_prefix_upstream: "{{ qbittorrent_container_image_registry_prefix_upstream_default }}"
 # Note: the image is also published to GHCR, but at a different repository
