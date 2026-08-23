@@ -23,6 +23,18 @@
         file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
         name: qbittorrent_defaults
 
+    # qbittorrent_version in the defaults is derived from the image tag via
+    # Jinja, which cannot render through the include_vars namespace - so the
+    # same derivation is applied here to the tag itself (a leaf literal).
+    - name: Determine the qBittorrent version the role installs
+      ansible.builtin.set_fact:
+        qbittorrent_verify_expected_version: >-
+          {{
+            qbittorrent_defaults.qbittorrent_container_image_tag
+            | regex_replace('-lt2-\d+$', '')
+            | regex_replace('-\d+$', '')
+          }}
+
     - name: Wait for qBittorrent service to become active (up to 180s)
       ansible.builtin.systemd:
         name: qbittorrent.service
@@ -67,10 +79,10 @@
     - name: Assert the running qBittorrent is the version this role installs
       ansible.builtin.assert:
         that: >-
-          (qbittorrent_api_version.content | trim | regex_replace('^v', '')).startswith(qbittorrent_defaults.qbittorrent_version)
+          (qbittorrent_api_version.content | trim | regex_replace('^v', '')).startswith(qbittorrent_verify_expected_version)
         fail_msg: >-
           qBittorrent reports {{ qbittorrent_api_version.content | trim }},
-          expected {{ qbittorrent_defaults.qbittorrent_version }}
+          expected {{ qbittorrent_verify_expected_version }}
         success_msg: "qBittorrent reports {{ qbittorrent_api_version.content | trim }}"
 
     - name: Query the qBittorrent Web UI API version

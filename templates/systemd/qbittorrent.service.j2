@@ -27,12 +27,13 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --log-driver=none \
       --user={{ qbittorrent_uid }}:{{ qbittorrent_gid }} \
       --cap-drop=ALL \
-      --cap-add=CHOWN \
-      --cap-add=DAC_OVERRIDE \
-      --cap-add=FOWNER \
-      --cap-add=SETGID \
-      --cap-add=SETUID \
       --read-only \
+      # The image's own entrypoint script would run qbittorrent-nox with
+      # --profile=/config (a nested config/data/cache layout). Launching via
+      # tini directly, combined with the HOME/XDG variables in the env file,
+      # keeps the flat /config/qBittorrent profile layout deployments have
+      # always had.
+      --entrypoint=/sbin/tini \
       --network={{ qbittorrent_container_network }} \
       {% if qbittorrent_container_http_host_bind_port %}
       -p {{ qbittorrent_container_http_host_bind_port }}:{{ qbittorrent_container_http_port }} \
@@ -50,12 +51,12 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% for volume in qbittorrent_container_additional_volumes %}
       --mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
       {% endfor %}
-      # https://docs.linuxserver.io/misc/read-only/#how
-      --tmpfs=/run:rw,exec,nosuid,size={{ qbittorrent_container_tmpfs_run_size }} \
+      --tmpfs=/tmp:rw,nosuid,nodev,size={{ qbittorrent_container_tmpfs_tmp_size }} \
       {% for arg in qbittorrent_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}
-      {{ qbittorrent_container_image }}
+      {{ qbittorrent_container_image }} \
+      -g -- qbittorrent-nox --confirm-legal-notice --webui-port={{ qbittorrent_container_http_port }} --torrenting-port={{ qbittorrent_container_torrenting_port }}
 
 {% for network in qbittorrent_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ qbittorrent_identifier }}

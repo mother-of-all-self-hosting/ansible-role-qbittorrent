@@ -20,28 +20,15 @@ Check [`defaults/main.yml`](defaults/main.yml) for the full list of supported op
 
 💡 For an Ansible playbook which integrates this role and makes it easier to use, see the [Mother-of-All-Self-Hosting Ansible playbook](https://github.com/mother-of-all-self-hosting/mash-playbook).
 
-## Limitations
+## Security
 
 This role configures qBittorrent with security in mind by doing the following:
 
 1. Running the container as a non-root user
-2. Making the filesystem read-only
-3. Dropping most capabilities
+2. Making the filesystem read-only (with a small `tmpfs` mounted at `/tmp`)
+3. Dropping all capabilities
 
-Unfortunately, due to upstream requirements, some admissions had to be made:
-
-1. Several capabilities related to permissions are added to the container
-   - SETUID
-   - SETGID
-   - CHOWN
-   - FOWNER
-   - DAC_OVERRIDE
-2. A `tmpfs` volume is mounted with `exec` permissions
-
-You can read more about these upstream requirements in the documentation:
-
-1. <https://docs.linuxserver.io/misc/non-root/>
-2. <https://docs.linuxserver.io/misc/read-only/>
+This is possible because the role runs the [qBittorrent project's own container image](https://github.com/qbittorrent/docker-qbittorrent-nox) with the `qbittorrent-nox` binary launched directly (via `tini`), bypassing the image's entrypoint script.
 
 ## Development
 
