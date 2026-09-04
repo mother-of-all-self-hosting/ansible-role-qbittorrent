@@ -176,7 +176,7 @@
         # From `qbittorrent_config_overrides_default`. Traefik is disabled in this scenario.
         - "WebUI\\HostHeaderValidation=true"
 
-    - name: Show qBittorrent verification summary
+    - name: Show the qBittorrent verification summary
       ansible.builtin.debug:
         msg:
           - "qBittorrent systemd: {{ qbittorrent_service.status.ActiveState }}"
