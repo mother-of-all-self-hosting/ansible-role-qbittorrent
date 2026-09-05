@@ -79,9 +79,7 @@
       ansible.builtin.assert:
         that: >-
           (qbittorrent_api_version.content | trim | regex_replace('^v', '')).startswith(qbittorrent_verify_expected_version)
-        fail_msg: >-
-          qBittorrent reports {{ qbittorrent_api_version.content | trim }},
-          expected {{ qbittorrent_verify_expected_version }}
+        fail_msg: "qBittorrent reports {{ qbittorrent_api_version.content | trim | default('none') }}, expected {{ qbittorrent_verify_expected_version }}"
         success_msg: "qBittorrent reports {{ qbittorrent_api_version.content | trim }}"
 
     - name: Query the qBittorrent Web UI API version
