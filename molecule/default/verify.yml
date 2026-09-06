@@ -82,7 +82,7 @@
         fail_msg: "qBittorrent reports {{ qbittorrent_api_version.content | trim | default('none') }}, expected {{ qbittorrent_verify_expected_version }}"
         success_msg: "qBittorrent reports {{ qbittorrent_api_version.content | trim }}"
 
-    - name: Query the qBittorrent Web UI API version
+    - name: Query the version of the running qBittorrent Web UI API
       ansible.builtin.uri:
         url: "{{ qbittorrent_verify_base_url }}/api/v2/app/webapiVersion"
         method: GET
