@@ -72,13 +72,11 @@
       retries: 120
       delay: 5
 
-    # The API reports the version with a leading `v` (`v5.2.1`), while the
-    # variable carries none. Upstream may append a suffix (release candidates
-    # and the like), so this is a prefix match rather than an equality check.
+    # The API reports its version with a leading `v` (`v2.1.3`), while the
+    # role variable does not carry one.
     - name: Assert the running qBittorrent is the version this role installs
       ansible.builtin.assert:
-        that: >-
-          (qbittorrent_api_version.content | trim | regex_replace('^v', '')).startswith(qbittorrent_verify_expected_version)
+        that: "qbittorrent_api_version.content | trim | regex_replace('^v', '') == qbittorrent_verify_expected_version"
         fail_msg: "qBittorrent reports {{ qbittorrent_api_version.content | trim | default('none') }}, expected {{ qbittorrent_verify_expected_version }}"
         success_msg: "qBittorrent reports {{ qbittorrent_api_version.content | trim }}"
 
