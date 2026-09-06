@@ -25,7 +25,7 @@
     # qbittorrent_version in the defaults is derived from the image tag via
     # Jinja, which cannot render through the include_vars namespace - so the
     # same derivation is applied here to the tag itself (a leaf literal).
-    - name: Determine the qBittorrent version the role installs
+    - name: Determine the version of the running qBittorrent
       ansible.builtin.set_fact:
         qbittorrent_verify_expected_version: >-
           {{
