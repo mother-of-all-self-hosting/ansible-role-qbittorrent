@@ -34,21 +34,27 @@
             | regex_replace('-\d+$', '')
           }}
 
-    - name: Wait for qBittorrent service to become active (up to 180s)
-      ansible.builtin.systemd:
+    - name: Wait for the qBittorrent systemd service to become active (up to 180s)
+      ansible.builtin.systemd_service:
         name: qbittorrent.service
       register: qbittorrent_service
       until: qbittorrent_service.status.ActiveState == 'active'
       retries: 36
       delay: 5
+      # So that giving up is reported by the assertion below rather than as a
+      # wall of systemd unit properties.
+      failed_when: false
 
-    - name: Assert qBittorrent service is active
+    # `Restart=always` in the systemd unit means that even a container which crashes
+    # and gets restarted reads as active here, so this is a precondition rather than
+    # a result.
+    - name: Assert the qBittorrent systemd service is active
       ansible.builtin.assert:
         that: qbittorrent_service.status.ActiveState == 'active'
-        fail_msg: "qbittorrent.service not active ({{ qbittorrent_service.status.ActiveState }})"
+        fail_msg: "qbittorrent.service is not active ({{ qbittorrent_service.status.ActiveState }})"
         success_msg: "qbittorrent.service is active"
 
-    - name: Retrieve qBittorrent service log for debugging
+    - name: Retrieve the qBittorrent systemd service log for debugging
       when: qbittorrent_debug_service_enabled | bool
       ansible.builtin.command:
         cmd: journalctl -xeu qbittorrent.service
