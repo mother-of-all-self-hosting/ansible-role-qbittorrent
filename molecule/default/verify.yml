@@ -57,7 +57,7 @@
     - name: Retrieve the qBittorrent systemd service log for debugging
       when: qbittorrent_debug_service_enabled | bool
       ansible.builtin.command:
-        cmd: journalctl -xeu qbittorrent.service
+        cmd: journalctl --no-pager --output=cat --unit=qbittorrent.service
       changed_when: false
 
     # The Web UI answers `/` with 200 even for callers that have not
