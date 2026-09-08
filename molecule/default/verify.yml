@@ -92,13 +92,13 @@
         method: GET
         status_code: [200]
         return_content: true
-      register: qbittorrent_api_webapi_version
+      register: qbittorrent_api_webapi_version_reported
 
     - name: Assert the qBittorrent Web UI API reports its own version
       ansible.builtin.assert:
-        that: qbittorrent_api_webapi_version.content | trim is match('^[0-9]+\.[0-9]+')
-        fail_msg: "Unexpected Web UI API version: {{ qbittorrent_api_webapi_version.content | default('no content') }}"
-        success_msg: "qBittorrent Web UI API version is {{ qbittorrent_api_webapi_version.content | trim }}"
+        that: qbittorrent_api_webapi_version_reported.content | trim is match('^[0-9]+\.[0-9]+')
+        fail_msg: "Unexpected Web UI API version: {{ qbittorrent_api_webapi_version_reported.content | default('no content') }}"
+        success_msg: "qBittorrent Web UI API version is {{ qbittorrent_api_webapi_version_reported.content | trim }}"
 
     # `/api/v2/transfer/info` is answered out of the BitTorrent session rather
     # than by the HTTP layer, so it only succeeds once libtorrent is actually
@@ -183,4 +183,4 @@
         msg:
           - "qBittorrent systemd: {{ qbittorrent_service.status.ActiveState }}"
           - "qBittorrent version: {{ qbittorrent_api_version.content | trim }}"
-          - "qBittorrent Web UI API version: {{ qbittorrent_api_webapi_version.content | trim }}"
+          - "qBittorrent Web UI API version: {{ qbittorrent_api_webapi_version_reported.content | trim }}"
