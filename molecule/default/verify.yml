@@ -14,6 +14,8 @@
     qbittorrent_verify_base_url: "http://localhost:8080"
 
   tasks:
+    - name: Verify that qBittorrent works
+      block:
     # The role is not included in this playbook, so its defaults are not in
     # scope. Reading defaults/main.yml directly ties the version assertion
     # below.
@@ -184,3 +186,19 @@
           - "qBittorrent systemd: {{ qbittorrent_service.status.ActiveState }}"
           - "qBittorrent version: {{ qbittorrent_api_version.content | trim }}"
           - "qBittorrent Web UI API version: {{ qbittorrent_api_webapi_version_reported.content | trim }}"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the qBittorrent systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=qbittorrent.service
+          register: qbittorrent_service_log
+          changed_when: false
+
+        - name: Show the qBittorrent systemd service log
+          ansible.builtin.debug:
+            var: qbittorrent_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "qBittorrent verification failed. The systemd service log is printed above."
