@@ -24,18 +24,6 @@
             file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
             name: qbittorrent_defaults
 
-        # qbittorrent_version in the defaults is derived from the image tag via
-        # Jinja, which cannot render through the include_vars namespace - so the
-        # same derivation is applied here to the tag itself (a leaf literal).
-        - name: Determine the version of the running qBittorrent
-          ansible.builtin.set_fact:
-            qbittorrent_verify_expected_version: >-
-              {{
-                qbittorrent_defaults.qbittorrent_container_image_tag
-                | regex_replace('-lt2-\d+$', '')
-                | regex_replace('-\d+$', '')
-              }}
-
         - name: Wait for the qBittorrent systemd service to become active (up to 180s)
           ansible.builtin.systemd_service:
             name: qbittorrent.service
@@ -79,6 +67,18 @@
           until: qbittorrent_api_version.status == 200
           retries: 120
           delay: 5
+
+        # qbittorrent_version in the defaults is derived from the image tag via
+        # Jinja, which cannot render through the include_vars namespace - so the
+        # same derivation is applied here to the tag itself (a leaf literal).
+        - name: Determine the version of the running qBittorrent
+          ansible.builtin.set_fact:
+            qbittorrent_verify_expected_version: >-
+              {{
+                qbittorrent_defaults.qbittorrent_container_image_tag
+                | regex_replace('-lt2-\d+$', '')
+                | regex_replace('-\d+$', '')
+              }}
 
         # The API reports its version with a leading `v` (`v2.1.3`), while the
         # role variable does not carry one.
