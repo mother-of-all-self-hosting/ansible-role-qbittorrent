@@ -13,6 +13,9 @@
   vars:
     qbittorrent_verify_base_url: "http://localhost:8080"
 
+    qbittorrent_verify_units:
+      - qbittorrent.service
+
   tasks:
     - name: Verify that qBittorrent works
       block:
@@ -24,13 +27,14 @@
             file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
             name: qbittorrent_defaults
 
-        - name: Wait for the qBittorrent systemd service to become active (up to 180s)
+        - name: Wait for the qBittorrent systemd services to become active (up to 180s each)
           ansible.builtin.systemd_service:
-            name: qbittorrent.service
-          register: qbittorrent_service
-          until: qbittorrent_service.status.ActiveState == 'active'
+            name: "{{ item }}"
+          register: qbittorrent_services
+          until: qbittorrent_services.status.ActiveState == 'active'
           retries: 36
           delay: 5
+          loop: "{{ qbittorrent_verify_units }}"
           # So that giving up is reported by the assertion below rather than as a
           # wall of systemd unit properties.
           failed_when: false
@@ -38,17 +42,20 @@
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
         # a result.
-        - name: Assert the qBittorrent systemd service is active
+        - name: Assert the qBittorrent systemd services are active
           ansible.builtin.assert:
-            that: qbittorrent_service.status.ActiveState == 'active'
-            fail_msg: "qbittorrent.service is not active ({{ qbittorrent_service.status.ActiveState }})"
-            success_msg: "qbittorrent.service is active"
+            that: qbittorrent_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(qbittorrent_verify_units | zip(qbittorrent_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Every systemd service is active"
 
-        - name: Retrieve the qBittorrent systemd service log for debugging
+        - name: Retrieve the qBittorrent systemd services log for debugging
           when: qbittorrent_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: journalctl --no-pager --output=cat --unit=qbittorrent.service
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
           changed_when: false
+          loop: "{{ qbittorrent_verify_units }}"
 
         # The Web UI answers `/` with 200 even for callers that have not
         # authenticated, so a 200 there proves nothing. The Web UI API does: it
@@ -183,7 +190,7 @@
         - name: Show the qBittorrent verification summary
           ansible.builtin.debug:
             msg:
-              - "qBittorrent systemd: {{ qbittorrent_service.status.ActiveState }}"
+              - "qBittorrent systemd: {% for unit, state in qbittorrent_verify_units | zip(qbittorrent_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "qBittorrent version: {{ qbittorrent_api_version.content | trim }}"
               - "qBittorrent Web UI API version: {{ qbittorrent_api_webapi_version_reported.content | trim }}"
 
