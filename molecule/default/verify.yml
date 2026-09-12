@@ -106,7 +106,7 @@
         - name: Assert the qBittorrent Web UI API reports its own version
           ansible.builtin.assert:
             that: qbittorrent_api_webapi_version_reported.content | trim is match('^[0-9]+\.[0-9]+')
-            fail_msg: "Unexpected Web UI API version: {{ qbittorrent_api_webapi_version_reported.content | default('no content') }}"
+            fail_msg: "Unexpected Web UI API version: {{ qbittorrent_api_webapi_version_reported.content | default('no response') }}"
             success_msg: "qBittorrent Web UI API version is {{ qbittorrent_api_webapi_version_reported.content | trim }}"
 
         # `/api/v2/transfer/info` is answered out of the BitTorrent session rather
