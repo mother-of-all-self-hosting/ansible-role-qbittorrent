@@ -31,6 +31,7 @@ provisioner:
       all:
         # Helper variables
         qbittorrent_debug_service_enabled: false
+        qbittorrent_restarts_check_enabled: true
 
         # Variables for qBittorrent
         qbittorrent_uid: 1000
