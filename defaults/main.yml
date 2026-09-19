@@ -139,6 +139,13 @@ qbittorrent_container_extra_arguments: "{{ qbittorrent_container_extra_arguments
 qbittorrent_container_extra_arguments_auto: []
 qbittorrent_container_extra_arguments_custom: []
 
+# A list of extra arguments to pass to the process inside the container
+# Example: ['--SOME_ARGUMENT']
+qbittorrent_process_extra_arguments: "{{ qbittorrent_process_extra_arguments_auto + qbittorrent_process_extra_arguments_custom }}"
+qbittorrent_process_extra_arguments_auto:
+  - "-g -- qbittorrent-nox --confirm-legal-notice --webui-port={{ qbittorrent_container_http_port }} --torrenting-port={{ qbittorrent_container_torrenting_port }}"
+qbittorrent_process_extra_arguments_custom: []
+
 # List of systemd services that the qBittorrent systemd service depends on
 qbittorrent_systemd_required_services_list: "{{ (qbittorrent_systemd_required_services_list_default + qbittorrent_systemd_required_services_list_auto + qbittorrent_systemd_required_services_list_custom) | unique }}"
 qbittorrent_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"

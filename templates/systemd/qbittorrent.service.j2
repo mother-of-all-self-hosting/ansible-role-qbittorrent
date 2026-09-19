@@ -56,7 +56,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {{ arg }} \
       {% endfor %}
       {{ qbittorrent_container_image }} \
-      -g -- qbittorrent-nox --confirm-legal-notice --webui-port={{ qbittorrent_container_http_port }} --torrenting-port={{ qbittorrent_container_torrenting_port }}
+      {% for arg in qbittorrent_process_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
 
 {% for network in qbittorrent_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ qbittorrent_identifier }}
