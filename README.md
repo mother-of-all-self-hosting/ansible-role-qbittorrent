@@ -13,8 +13,8 @@ This role *implicitly* depends on:
 
 - [`com.devture.ansible.role.playbook_help`](https://github.com/devture/com.devture.ansible.role.playbook_help)
 - [`com.devture.ansible.role.systemd_docker_base`](https://github.com/devture/com.devture.ansible.role.systemd_docker_base)
-
-It also requires the [`community.docker`](https://galaxy.ansible.com/ui/repo/published/community/docker/) and [`community.general`](https://galaxy.ansible.com/ui/repo/published/community/general/) Ansible collections. Both are part of the [`ansible` package](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-and-upgrading-ansible-with-pipx), so you likely have them already.
+- [`community.docker`](https://galaxy.ansible.com/ui/repo/published/community/docker/)
+- [`community.general`](https://galaxy.ansible.com/ui/repo/published/community/general/)
 
 Check [`defaults/main.yml`](defaults/main.yml) for the full list of supported options.
 
