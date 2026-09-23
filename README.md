@@ -16,7 +16,7 @@ This role *implicitly* depends on:
 - [`community.docker`](https://galaxy.ansible.com/ui/repo/published/community/docker/)
 - [`community.general`](https://galaxy.ansible.com/ui/repo/published/community/general/)
 
-Check [`defaults/main.yml`](defaults/main.yml) for the full list of supported options.
+Check [`defaults/main.yml`](defaults/main.yml) for the full list of supported options. Refer to [this page](docs/configuring-qbittorrent.md) for details about setting up the service with this role.
 
 💡 For an Ansible playbook which integrates this role and makes it easier to use, see the [Mother-of-All-Self-Hosting Ansible playbook](https://github.com/mother-of-all-self-hosting/mash-playbook).
 
