@@ -22,10 +22,10 @@
   when: qbittorrent_enabled | bool
   tags:
     - molecule-notest
-    - print-qbittorrent-password
+    - print-password-qbittorrent
   block:
     - name: Run qBittorrent print temporary password tasks
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/print_qbittorrent_password.yml"
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/print_password_qbittorrent.yml"
 
 - name: Perform qBittorrent uninstallation tasks
   when: not qbittorrent_enabled | bool

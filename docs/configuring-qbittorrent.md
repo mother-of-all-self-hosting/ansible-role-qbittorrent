@@ -92,7 +92,7 @@ After running the command for installation, qBittorrent becomes available at the
 To get started, open the URL with a web browser to log in to the instance with a **temporary** randomly generated password. You can output the password by running the playbook as below:
 
 ```sh
-ansible-playbook -i inventory/hosts setup.yml --tags=print-qbittorrent-password
+ansible-playbook -i inventory/hosts setup.yml --tags=print-password-qbittorrent
 ```
 
 After logging in to the instance as the `admin` user with the password, you need to change it under `Tools -> Options -> WebUI` in the `Authentication` section. The generated password is a temporary  one, and will change on each start-up.
