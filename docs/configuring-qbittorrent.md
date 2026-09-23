@@ -18,11 +18,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up qBittorrent
 
-This is an [Ansible](https://www.ansible.com/) role which installs [qBittorrent](https://docs.linuxserver.io/images/docker-qbittorrent) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [qBittorrent](https://www.qbittorrent.org/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
 qBittorrent is a BitTorrent client programmed in C++ / Qt that uses libtorrent.
 
-See the project's [documentation](https://docs.linuxserver.io/images/docker-qbittorrent/) to learn what qBittorrent does and why it might be useful to you.
+See the project's [documentation](https://github.com/qbittorrent/qBittorrent/wiki/) to learn what qBittorrent does and why it might be useful to you.
 
 ## Adjusting the playbook configuration
 
