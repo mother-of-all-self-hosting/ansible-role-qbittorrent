@@ -105,7 +105,7 @@ Set the `host` field to your qBittorrent URL (without the protocol) and `port` a
 
 Fill in the rest of the form with your preferences, and you're done!
 
-![Sonarr Add Download Client](../assets/sonarr/add-download-client.webp)
+![Sonarr Add Download Client](./assets/sonarr-add-download-client.webp)
 
 >[!NOTE]
 > If you are looking for an Ansible role for Sonarr and Radarr, you can check out [ansible-role-sonarr](https://github.com/spatterIight/ansible-role-sonarr) and [ansible-role-radarr](https://github.com/spatterIight/ansible-role-radarr).

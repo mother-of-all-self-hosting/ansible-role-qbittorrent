@@ -19,3 +19,9 @@ path = [
 ]
 SPDX-FileCopyrightText = "NONE"
 SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["docs/assets/*.webp"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025 spatterIight"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
