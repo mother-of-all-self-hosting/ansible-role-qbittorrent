@@ -95,11 +95,11 @@ To get started, open the URL with a web browser to log in to the instance with t
 just run-tags print-qbittorrent-password
 ```
 
-Once you've got that, log in as the `admin` user with the password and change it under `Tools -> Options -> WebUI` in the `Authentication` section. Make sure you change the password, since the default one is temporary and will change with each start-up.
+After logging in to the instance as the `admin` user with the password, you need to change it under `Tools -> Options -> WebUI` in the `Authentication` section. The generated password is a temporary  one, and will change on each start-up.
 
 ### Integration with Sonarr/Radarr
 
-To add qBittorrent to your [Sonarr](sonarr.md) or [Radarr](radarr.md) instance navigate to the form at `Settings > Download Clients > Add > qBittorrent`:
+To add qBittorrent to your [Sonarr](https://sonarr.tv/) or [Radarr](https://radarr.video/) instance navigate to the form at `Settings > Download Clients > Add > qBittorrent`:
 
 Set the `host` field to your qBittorrent URL (without the protocol) and `port` as 443. Make sure to click `Use SSL`. Set the `username` and `password` fields as your qBittorrent credentials.
 
