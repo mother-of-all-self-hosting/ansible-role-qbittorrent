@@ -187,6 +187,35 @@
             # From `qbittorrent_config_overrides_default`. Traefik is disabled in this scenario.
             - "WebUI\\HostHeaderValidation=true"
 
+        # A qBittorrent that gets killed rather than shut down cleanly (a session too large
+        # to save within the stop timeout, a crash) leaves its lockfile behind, and the next
+        # container's qBittorrent would take it for a running instance.
+        - name: Kill the qBittorrent container
+          ansible.builtin.command:
+            cmd: docker kill qbittorrent
+          changed_when: true
+
+        - name: Check for the lockfile left behind by the killed qBittorrent
+          ansible.builtin.stat:
+            path: /qbittorrent/data/qBittorrent/lockfile
+          register: qbittorrent_lockfile
+
+        - name: Assert the killed qBittorrent left its lockfile behind
+          ansible.builtin.assert:
+            that: qbittorrent_lockfile.stat.exists
+            fail_msg: "No lockfile was left behind, so this does not test recovering from one"
+            success_msg: "The killed qBittorrent left its lockfile behind"
+
+        - name: Wait for the qBittorrent Web UI API to answer after the kill (up to 10m)
+          ansible.builtin.uri:
+            url: "{{ qbittorrent_verify_base_url }}/api/v2/app/version"
+            method: GET
+            status_code: [200]
+          register: qbittorrent_api_version_after_kill
+          until: qbittorrent_api_version_after_kill.status == 200
+          retries: 120
+          delay: 5
+
         - name: Verify nothing was quietly restarting while all of that was being checked
           when: "qbittorrent_restarts_check_enabled | bool"
           block:
