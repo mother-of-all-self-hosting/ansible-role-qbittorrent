@@ -20,14 +20,16 @@ Type=simple
 Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
 ExecStartPre={{ devture_systemd_docker_base_host_command_sh }} -c '{{ qbittorrent_container_cleanup_command | trim | replace("\n", " ") }}'
 
-# Remove the lockfile a killed qBittorrent leaves behind, which the next container's
-# qBittorrent (same PID and hostname) would take for a running instance, and exit.
+# Remove the lockfile a killed qBittorrent leaves behind. With a set hostname, the next
+# container's qBittorrent (always PID 7) takes it for a running instance, and exits.
 ExecStartPre={{ devture_systemd_docker_base_host_command_sh }} -c 'rm -f {{ qbittorrent_data_path }}/qBittorrent/lockfile'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --rm \
       --name={{ qbittorrent_identifier }} \
+      {% if qbittorrent_container_hostname %}
       --hostname={{ qbittorrent_container_hostname }} \
+      {% endif %}
       --log-driver=none \
       --user={{ qbittorrent_uid }}:{{ qbittorrent_gid }} \
       --cap-drop=ALL \
