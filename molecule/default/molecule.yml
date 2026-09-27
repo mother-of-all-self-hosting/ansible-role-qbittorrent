@@ -37,6 +37,9 @@ provisioner:
         qbittorrent_uid: 1000
         qbittorrent_gid: 1000
         qbittorrent_hostname: localhost
+        # With Docker's random hostname, qBittorrent clears a stale lockfile itself.
+        # A set one makes the verifier's kill test depend on the role removing it.
+        qbittorrent_container_hostname: qbittorrent
         qbittorrent_container_labels_traefik_enabled: false
         qbittorrent_container_http_host_bind_port: 8080
         qbittorrent_config_overrides_custom:
