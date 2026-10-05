@@ -204,11 +204,14 @@ qbittorrent_environment_variables_additional_variables: ""
 # This is fed to `qbittorrent_config_overrides_default` (see below).
 qbittorrent_config_bittorrent_session_default_save_path: "{{ qbittorrent_download_bind_path }}/"
 
-# Controls whether qBittorrent validates the `Host` header of Web UI requests.
-# This needs to be disabled when qBittorrent is served via a reverse-proxy,
-# unless the reverse-proxy passes the expected `Host` header along.
+# Controls whether qBittorrent validates the `Host` header of Web UI requests (enabled by default upstream).
+# When enabled, a `Host` header containing a port different from `qbittorrent_container_http_port` gets rejected
+# with a 401 "port mismatch" error. This happens when accessing the Web UI directly via
+# `qbittorrent_container_http_host_bind_port` set to a different port (e.g. "8081" for container port 8080),
+# or via a reverse-proxy which does not pass the original `Host` header along (or listens on a non-standard port).
+# To fix it, either disable this or use the same port number on both sides.
 # This is fed to `qbittorrent_config_overrides_default` (see below).
-qbittorrent_config_preferences_webui_host_header_validation: "{{ 'false' if qbittorrent_container_labels_traefik_enabled | bool else 'true' }}"
+qbittorrent_config_preferences_webui_host_header_validation: 'true'
 
 # qbittorrent_config_overrides lets you set specific keys in qBittorrent's own
 # `qBittorrent.conf` file, without touching any other settings in it (things
