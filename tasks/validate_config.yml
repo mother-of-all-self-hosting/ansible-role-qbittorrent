@@ -20,8 +20,6 @@
 
 # qBittorrent v5.3.0 moved its Web UI settings from `[Preferences] WebUI\...` to `[WebUI] ...`.
 # It migrates existing keys once and ignores any written to the old place afterwards.
-# It reads no `[Preferences]` options starting with `WebUI` at all, so the prefix alone is enough
-# (and also catches options spelled with `/`, which qBittorrent reads the same as `\`).
 - name: Fail if qBittorrent configuration overrides use the old Web UI settings section
   ansible.builtin.fail:
     msg: >-
