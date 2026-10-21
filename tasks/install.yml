@@ -105,30 +105,9 @@
         label: "[{{ item.section }}] {{ item.option }}"
       register: qbittorrent_config_overrides_check_result
 
-    # When upgrading from a version older than v5.3.0, qBittorrent moves the old `[Preferences] WebUI\...`
-    # values over the `[WebUI]` ones on its first start. `[WebUI]` overrides thus only stick if the old
-    # keys are gone by then. See the note about `mode` below.
-    - name: Check if old Web UI settings superseded by configuration overrides need removing  # noqa risky-file-permissions
-      community.general.ini_file:
-        path: "{{ qbittorrent_config_file_path }}"
-        section: Preferences
-        option: 'WebUI\{{ item.option }}'
-        state: absent
-        owner: "{{ qbittorrent_uid }}"
-        group: "{{ qbittorrent_gid }}"
-      check_mode: true
-      loop: "{{ qbittorrent_config_overrides | selectattr('section', 'eq', 'WebUI') | list }}"
-      loop_control:
-        label: "[Preferences] WebUI\\{{ item.option }}"
-      register: qbittorrent_config_overrides_superseded_check_result
-
     - name: Determine whether qBittorrent configuration overrides need applying
       ansible.builtin.set_fact:
-        qbittorrent_config_overrides_changes_necessary: >-
-          {{
-            qbittorrent_config_overrides_check_result.changed | default(false)
-            or qbittorrent_config_overrides_superseded_check_result.changed | default(false)
-          }}
+        qbittorrent_config_overrides_changes_necessary: "{{ qbittorrent_config_overrides_check_result.changed | default(false) }}"
 
     - name: Apply qBittorrent configuration overrides
       when: qbittorrent_config_overrides_changes_necessary | bool
@@ -162,18 +141,6 @@
           loop: "{{ qbittorrent_config_overrides }}"
           loop_control:
             label: "[{{ item.section }}] {{ item.option }}"
-
-        - name: Ensure old Web UI settings superseded by configuration overrides are removed  # noqa risky-file-permissions
-          community.general.ini_file:
-            path: "{{ qbittorrent_config_file_path }}"
-            section: Preferences
-            option: 'WebUI\{{ item.option }}'
-            state: absent
-            owner: "{{ qbittorrent_uid }}"
-            group: "{{ qbittorrent_gid }}"
-          loop: "{{ qbittorrent_config_overrides | selectattr('section', 'eq', 'WebUI') | list }}"
-          loop_control:
-            label: "[Preferences] WebUI\\{{ item.option }}"
 
         - name: Ensure qBittorrent systemd service is started back after applying configuration overrides
           when: qbittorrent_service_was_running | bool
