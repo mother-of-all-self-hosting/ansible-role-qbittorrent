@@ -171,21 +171,25 @@
             src: /qbittorrent/data/qBittorrent/qBittorrent.conf
           register: qbittorrent_config_file
 
-        # `WebUI\HostHeaderValidation` is not exposed through the API, so it is
-        # checked in the file that qBittorrent rewrote from memory during the
-        # restart above - which still shows that the setting survived the cycle.
+        # The API reports `HostHeaderValidation` as enabled even without the override
+        # (it is qBittorrent's default), so it is checked in the file that qBittorrent
+        # rewrote from memory during the restart above - which still shows that the
+        # setting survived the cycle. Each option is looked up in its own section,
+        # as qBittorrent ignores options in the wrong one.
         - name: Assert qBittorrent configuration overrides survived a service restart
           ansible.builtin.assert:
-            that: item in (qbittorrent_config_file.content | b64decode)
-            fail_msg: "qBittorrent configuration does not contain `{{ item }}`"
-            success_msg: "qBittorrent configuration contains `{{ item }}`"
+            that: >-
+              ((qbittorrent_config_file.content | b64decode | community.general.from_ini)[item.section] | default({}))[item.option] | default(none)
+              == item.value
+            fail_msg: "qBittorrent configuration does not contain `{{ item.option }}={{ item.value }}` in its `[{{ item.section }}]` section"
+            success_msg: "qBittorrent configuration contains `{{ item.option }}={{ item.value }}` in its `[{{ item.section }}]` section"
           with_items:
             # From `qbittorrent_config_overrides_custom`
-            - "Session\\MaxActiveDownloads=7"
+            - { "section": "BitTorrent", "option": 'Session\MaxActiveDownloads', "value": "7" }
             # From `qbittorrent_config_overrides_default`
-            - "Session\\DefaultSavePath=/downloads/"
+            - { "section": "BitTorrent", "option": 'Session\DefaultSavePath', "value": "/downloads/" }
             # From `qbittorrent_config_overrides_default`. Traefik is disabled in this scenario.
-            - "WebUI\\HostHeaderValidation=true"
+            - { "section": "WebUI", "option": "HostHeaderValidation", "value": "true" }
 
         # A qBittorrent that gets killed rather than shut down cleanly (a session too large
         # to save within the stop timeout, a crash) leaves its lockfile behind, and the next

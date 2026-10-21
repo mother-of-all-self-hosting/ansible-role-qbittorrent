@@ -59,11 +59,11 @@ provisioner:
           # verifier reach the Web UI API without authenticating - which
           # doubles as a check that the role's configuration overrides reach
           # the running process, since the API answers 403 without them.
-          - section: Preferences
-            option: WebUI\AuthSubnetWhitelistEnabled
+          - section: WebUI
+            option: AuthSubnetWhitelistEnabled
             value: "true"
-          - section: Preferences
-            option: WebUI\AuthSubnetWhitelist
+          - section: WebUI
+            option: AuthSubnetWhitelist
             value: 0.0.0.0/0
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391

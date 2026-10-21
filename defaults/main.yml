@@ -211,7 +211,7 @@ qbittorrent_config_bittorrent_session_default_save_path: "{{ qbittorrent_downloa
 # or via a reverse-proxy which does not pass the original `Host` header along (or listens on a non-standard port).
 # To fix it, either disable this or use the same port number on both sides.
 # This is fed to `qbittorrent_config_overrides_default` (see below).
-qbittorrent_config_preferences_webui_host_header_validation: 'true'
+qbittorrent_config_webui_host_header_validation: 'true'
 
 # qbittorrent_config_overrides lets you set specific keys in qBittorrent's own
 # `qBittorrent.conf` file, without touching any other settings in it (things
@@ -221,6 +221,9 @@ qbittorrent_config_preferences_webui_host_header_validation: 'true'
 # Each entry is a `section`/`option`/`value` triplet, matching the actual INI
 # file structure. Give values as strings, matching exactly what qBittorrent
 # itself would write to the file.
+#
+# Since qBittorrent v5.3.0, Web UI settings live in the `WebUI` section (e.g.
+# `[WebUI] Address`), instead of `[Preferences] WebUI\Address` as before.
 #
 # Entries are applied in order, so if the same `section`/`option` is defined
 # more than once, the last one wins. Because of the order below, this means
@@ -242,8 +245,8 @@ qbittorrent_config_preferences_webui_host_header_validation: 'true'
 #
 # Example:
 # qbittorrent_config_overrides_custom:
-#   - section: Preferences
-#     option: WebUI\Address
+#   - section: WebUI
+#     option: Address
 #     value: "*"
 #   - section: BitTorrent
 #     option: Session\DefaultSavePath
@@ -253,9 +256,9 @@ qbittorrent_config_overrides_default:
   - section: BitTorrent
     option: Session\DefaultSavePath
     value: "{{ qbittorrent_config_bittorrent_session_default_save_path }}"
-  - section: Preferences
-    option: WebUI\HostHeaderValidation
-    value: "{{ qbittorrent_config_preferences_webui_host_header_validation }}"
+  - section: WebUI
+    option: HostHeaderValidation
+    value: "{{ qbittorrent_config_webui_host_header_validation }}"
 qbittorrent_config_overrides_auto: []
 qbittorrent_config_overrides_custom: []
 
