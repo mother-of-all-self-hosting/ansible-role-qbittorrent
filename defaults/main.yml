@@ -46,7 +46,7 @@ qbittorrent_container_image: "{{ qbittorrent_container_image_registry_prefix }}q
 # libtorrent 1.2.x - switching an existing installation to them may force
 # torrent rechecks and affects BitTorrent-v2/hybrid torrents.
 # renovate: datasource=docker depName=qbittorrentofficial/qbittorrent-nox
-qbittorrent_container_image_tag: 5.2.4-lt2-1
+qbittorrent_container_image_tag: 5.3.0-lt2-1
 qbittorrent_container_image_registry_prefix: "{{ qbittorrent_container_image_registry_prefix_upstream }}"
 qbittorrent_container_image_registry_prefix_upstream: "{{ qbittorrent_container_image_registry_prefix_upstream_default }}"
 # Note: the image is also published to GHCR, but at a different repository
@@ -211,7 +211,7 @@ qbittorrent_config_bittorrent_session_default_save_path: "{{ qbittorrent_downloa
 # or via a reverse-proxy which does not pass the original `Host` header along (or listens on a non-standard port).
 # To fix it, either disable this or use the same port number on both sides.
 # This is fed to `qbittorrent_config_overrides_default` (see below).
-qbittorrent_config_preferences_webui_host_header_validation: 'true'
+qbittorrent_config_webui_host_header_validation: 'true'
 
 # qbittorrent_config_overrides lets you set specific keys in qBittorrent's own
 # `qBittorrent.conf` file, without touching any other settings in it (things
@@ -242,8 +242,8 @@ qbittorrent_config_preferences_webui_host_header_validation: 'true'
 #
 # Example:
 # qbittorrent_config_overrides_custom:
-#   - section: Preferences
-#     option: WebUI\Address
+#   - section: WebUI
+#     option: Address
 #     value: "*"
 #   - section: BitTorrent
 #     option: Session\DefaultSavePath
@@ -253,9 +253,9 @@ qbittorrent_config_overrides_default:
   - section: BitTorrent
     option: Session\DefaultSavePath
     value: "{{ qbittorrent_config_bittorrent_session_default_save_path }}"
-  - section: Preferences
-    option: WebUI\HostHeaderValidation
-    value: "{{ qbittorrent_config_preferences_webui_host_header_validation }}"
+  - section: WebUI
+    option: HostHeaderValidation
+    value: "{{ qbittorrent_config_webui_host_header_validation }}"
 qbittorrent_config_overrides_auto: []
 qbittorrent_config_overrides_custom: []
 
