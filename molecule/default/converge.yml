@@ -29,7 +29,9 @@
       ansible.builtin.systemd_service:
         daemon_reload: true
 
+    # Like the playbook's service manager, restart the service when the role says so
+    # (e.g. for a new image, as when the `upgrade` scenario's older version is running).
     - name: Ensure qBittorrent systemd service is started
       ansible.builtin.systemd_service:
         name: qbittorrent.service
-        state: started
+        state: "{{ 'restarted' if qbittorrent_restart_necessary | bool else 'started' }}"

@@ -43,11 +43,17 @@ pip3 install -r ./molecule/requirements.txt
 
 ## Scenarios
 
-Currently there is one testing scenario available.
+Currently these testing scenarios are available:
 
 ### `default`
 
 Tests a standard qBittorrent installation.
+
+### `upgrade`
+
+Tests upgrading an existing qBittorrent v5.2.4 installation to the version the role installs. qBittorrent v5.3.0 renamed some settings and moves their values over on its first start, so this checks that the role's configuration overrides survive that.
+
+It reuses the `default` scenario's converge and verification playbooks, and installs qBittorrent v5.2.4 in its own `prepare.yml`.
 
 ## Running
 

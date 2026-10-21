@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Prepare qBittorrent Molecule tests
+  ansible.builtin.import_playbook: ../default/prepare.yml
+
+# qBittorrent v5.2.4 is the last release before v5.3.0 renamed some settings (moving the Web UI ones
+# from `[Preferences] WebUI\...` to `[WebUI] ...`), which v5.3.0 migrates once when it first starts.
+# The converge then upgrades this installation, the way the role would upgrade an existing one.
+- name: Install and start qBittorrent v5.2.4
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    qbittorrent_container_image_tag: 5.2.4-lt2-1
+    # The opposite of what the converge sets, so that the verifier can tell whether
+    # qBittorrent v5.3.0 moved this old value over the role's override as it upgraded.
+    qbittorrent_config_webui_host_header_validation: 'false'
+    # The same as the converge sets (see molecule.yml), in the section qBittorrent v5.2.4 reads.
+    qbittorrent_config_overrides_custom:
+      - section: BitTorrent
+        option: Session\MaxActiveDownloads
+        value: "7"
+      - section: Preferences
+        option: WebUI\AuthSubnetWhitelistEnabled
+        value: "true"
+      - section: Preferences
+        option: WebUI\AuthSubnetWhitelist
+        value: 0.0.0.0/0
+  tasks:
+    - name: Include roles for qBittorrent Molecule tests
+      ansible.builtin.include_role:
+        name: "{{ role_name }}"
+        public: true
+      loop:
+        - com.devture.ansible.role.playbook_help
+        - com.devture.ansible.role.systemd_docker_base
+        - "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
+      loop_control:
+        loop_var: role_name
+
+    - name: Ensure systemd daemon is reloaded
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    - name: Ensure qBittorrent systemd service is started
+      ansible.builtin.systemd_service:
+        name: qbittorrent.service
+        state: started
+
+    # The API only answers without authentication once the whitelist override
+    # took effect, so this also shows that qBittorrent v5.2.4 read its overrides.
+    - name: Wait for the qBittorrent v5.2.4 Web UI API to answer (up to 10m)
+      ansible.builtin.uri:
+        url: http://localhost:8080/api/v2/app/preferences
+        method: GET
+        status_code: [200]
+        return_content: true
+      register: qbittorrent_prepare_api_preferences
+      until: qbittorrent_prepare_api_preferences.status == 200
+      retries: 120
+      delay: 5
+
+    - name: Assert qBittorrent v5.2.4 adopted the role's Web UI override in its own section
+      ansible.builtin.assert:
+        that: not qbittorrent_prepare_api_preferences.json.web_ui_host_header_validation_enabled | bool
+        fail_msg: "qBittorrent v5.2.4 still validates the Web UI Host header, so it did not read `[Preferences] WebUI\\HostHeaderValidation`"
+        success_msg: "qBittorrent v5.2.4 adopted `[Preferences] WebUI\\HostHeaderValidation`"
