@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+# Settings which qBittorrent v5.3.0 renamed, given as QSettings keys: the section, a `/`, and the option
+# with `/` in place of its `\` (`[Preferences] WebUI\Address` is `Preferences/WebUI/Address`).
+# When it first starts, qBittorrent v5.3.0 moves the value of each old setting (`from`) to the new ones (`to`),
+# removes the old setting and never reads it again. `note` points out new settings which take different values.
+# See `upgrade()` in https://github.com/qbittorrent/qBittorrent/blob/release-5.3.0/src/app/upgrade.cpp
+qbittorrent_config_keys_renamed_in_5_3_0:
+  - { from: Preferences/Advanced/TrayIconStyle, to: [Appearance/TrayIconStyle], note: "which takes `Normal` or `Monochrome`" }
+  - { from: Preferences/MailNotification/req_ssl, to: [Preferences/MailNotification/SMTPEncryptionType], note: "which takes `None`, `STARTTLS` or `SMTPS` instead of `false` or `true`" }
+  - { from: BitTorrent/Session/TorrentExportDirectory, to: [BitTorrent/Session/TorrentBackupDirectory, BitTorrent/Session/TorrentBackupEnabled], note: "with the latter set to `true`" }
+  - { from: BitTorrent/Session/FinishedTorrentExportDirectory, to: [BitTorrent/Session/FinishedTorrentBackupDirectory, BitTorrent/Session/FinishedTorrentBackupDirectoryEnabled], note: "with the latter set to `true`" }
+  - { from: Preferences/WebUI/Enabled, to: [WebUI/Enabled] }
+  - { from: Preferences/WebUI/LocalHostAuth, to: [WebUI/LocalHostAuth] }
+  - { from: Preferences/WebUI/AuthSubnetWhitelistEnabled, to: [WebUI/AuthSubnetWhitelistEnabled] }
+  - { from: Preferences/WebUI/AuthSubnetWhitelist, to: [WebUI/AuthSubnetWhitelist] }
+  - { from: Preferences/WebUI/ServerDomains, to: [WebUI/ServerDomains] }
+  - { from: Preferences/WebUI/Address, to: [WebUI/Address] }
+  - { from: Preferences/WebUI/Port, to: [WebUI/Port] }
+  - { from: Preferences/WebUI/UseUPnP, to: [WebUI/UseUPnP] }
+  - { from: Preferences/WebUI/Username, to: [WebUI/Username] }
+  - { from: Preferences/WebUI/Password_PBKDF2, to: [WebUI/Password_PBKDF2] }
+  - { from: Preferences/WebUI/APIKey, to: [WebUI/APIKey] }
+  - { from: Preferences/WebUI/MaxAuthenticationFailCount, to: [WebUI/MaxAuthenticationFailCount] }
+  - { from: Preferences/WebUI/BanDuration, to: [WebUI/BanDuration] }
+  - { from: Preferences/WebUI/SessionTimeout, to: [WebUI/SessionTimeout] }
+  - { from: Preferences/WebUI/ClickjackingProtection, to: [WebUI/ClickjackingProtection] }
+  - { from: Preferences/WebUI/CSRFProtection, to: [WebUI/CSRFProtection] }
+  - { from: Preferences/WebUI/SecureCookie, to: [WebUI/SecureCookie] }
+  - { from: Preferences/WebUI/HostHeaderValidation, to: [WebUI/HostHeaderValidation] }
+  - { from: Preferences/WebUI/HTTPS/Enabled, to: [WebUI/HTTPS/Enabled] }
+  - { from: Preferences/WebUI/HTTPS/CertificatePath, to: [WebUI/HTTPS/CertificatePath] }
+  - { from: Preferences/WebUI/HTTPS/KeyPath, to: [WebUI/HTTPS/KeyPath] }
+  - { from: Preferences/WebUI/AlternativeUIEnabled, to: [WebUI/AlternativeUIEnabled] }
+  - { from: Preferences/WebUI/RootFolder, to: [WebUI/RootFolder] }
+  - { from: Preferences/WebUI/CustomHTTPHeadersEnabled, to: [WebUI/CustomHTTPHeadersEnabled] }
+  - { from: Preferences/WebUI/CustomHTTPHeaders, to: [WebUI/CustomHTTPHeaders] }
+  - { from: Preferences/WebUI/ReverseProxySupportEnabled, to: [WebUI/ReverseProxySupportEnabled] }
+  - { from: Preferences/WebUI/TrustedReverseProxiesList, to: [WebUI/TrustedReverseProxiesList] }
+  - { from: Search/StoreOpenedSearchTabs, to: [Search/StoreSearchJobs] }
+  - { from: Search/StoreOpenedSearchTabResults, to: [Search/StoreSearchJobResults] }
+
+# The QSettings key (see above) that each entry in `qbittorrent_config_overrides` sets.
+# QSettings reads `\` and `/` in INI keys alike, so `option: WebUI/Address` sets the same key as `option: WebUI\Address`.
+# Ansible keeps backslashes in template strings as written, so the regular expression `'\\'` matches a single backslash.
+qbittorrent_config_overrides_keys: >-
+  {{
+    qbittorrent_config_overrides | map(attribute='section')
+    | zip(qbittorrent_config_overrides | map(attribute='option'))
+    | map('join', '/')
+    | map('regex_replace', '\\', '/')
+    | list
+  }}
+
+# The settings of `qbittorrent_config_keys_renamed_in_5_3_0` which `qbittorrent_config_overrides` set by their old name.
+# qBittorrent would ignore these overrides, so the role refuses them instead (see `tasks/validate_config.yml`).
+qbittorrent_config_overrides_renamed: >-
+  {{
+    qbittorrent_config_keys_renamed_in_5_3_0 | selectattr('from', 'in', qbittorrent_config_overrides_keys) | list
+    if qbittorrent_version_is_5_3_0_or_newer | bool else []
+  }}
+
+# The old keys of the settings in `qbittorrent_config_keys_renamed_in_5_3_0` whose new keys `qbittorrent_config_overrides` all set.
+# When upgrading from an older version, qBittorrent v5.3.0 would move the old values over these overrides as it first starts,
+# so the role removes the old keys (see `tasks/install.yml`). A setting which moves to more than one new key is only removed
+# once overrides set all of them, since the values of the others would get lost otherwise.
+qbittorrent_config_overrides_superseded_keys: >-
+  {{
+    qbittorrent_config_keys_renamed_in_5_3_0 | selectattr('to', 'subset', qbittorrent_config_overrides_keys) | map(attribute='from') | list
+    if qbittorrent_version_is_5_3_0_or_newer | bool else []
+  }}

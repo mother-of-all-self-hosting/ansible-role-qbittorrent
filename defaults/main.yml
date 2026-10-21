@@ -28,6 +28,11 @@ qbittorrent_download_bind_path: "/downloads"
 # The qBittorrent version, derived from the image tag below.
 qbittorrent_version: "{{ qbittorrent_container_image_tag | regex_replace('-lt2-\\d+$', '') | regex_replace('-\\d+$', '') }}"
 
+# Whether `qbittorrent_version` is v5.3.0 or newer, which renamed some settings (most notably
+# moving the Web UI ones from `[Preferences] WebUI\...` to a `[WebUI]` section of their own).
+# A version which is not made of numbers only (e.g. from a `latest` tag) counts as newer.
+qbittorrent_version_is_5_3_0_or_newer: "{{ qbittorrent_version is not match('^[0-9]+(\\.[0-9]+)*$') or qbittorrent_version is version('5.3.0', '>=') }}"
+
 qbittorrent_arch: amd64
 
 qbittorrent_uid: ""
@@ -240,6 +245,11 @@ qbittorrent_config_webui_host_header_validation: 'true'
 # first if necessary and starting it back up afterwards, so that it's left in
 # the state it was found in.
 #
+# qBittorrent v5.3.0 renamed some settings, and the role refuses overrides
+# which use their old names (see `vars/main.yml`). With a qBittorrent older
+# than v5.3.0, Web UI settings go to `section: Preferences` with a `WebUI\`
+# prefix on the option instead (e.g. `option: WebUI\Address`).
+#
 # Example:
 # qbittorrent_config_overrides_custom:
 #   - section: WebUI
@@ -253,8 +263,8 @@ qbittorrent_config_overrides_default:
   - section: BitTorrent
     option: Session\DefaultSavePath
     value: "{{ qbittorrent_config_bittorrent_session_default_save_path }}"
-  - section: WebUI
-    option: HostHeaderValidation
+  - section: "{{ 'WebUI' if qbittorrent_version_is_5_3_0_or_newer | bool else 'Preferences' }}"
+    option: '{{ "HostHeaderValidation" if qbittorrent_version_is_5_3_0_or_newer | bool else "WebUI\HostHeaderValidation" }}'
     value: "{{ qbittorrent_config_webui_host_header_validation }}"
 qbittorrent_config_overrides_auto: []
 qbittorrent_config_overrides_custom: []

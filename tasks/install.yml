@@ -105,9 +105,28 @@
         label: "[{{ item.section }}] {{ item.option }}"
       register: qbittorrent_config_overrides_check_result
 
+    # When it first starts, qBittorrent v5.3.0 moves the values of the settings it renamed over whatever
+    # their new names hold. Overrides of the new names thus only stick if the old ones are gone by then.
+    # See `qbittorrent_config_overrides_superseded_keys` and the note about `mode` below.
+    - name: Check if qBittorrent settings superseded by configuration overrides need removing  # noqa risky-file-permissions
+      community.general.ini_file:
+        path: "{{ qbittorrent_config_file_path }}"
+        section: "{{ item.split('/', 1) | first }}"
+        option: '{{ item.split("/", 1) | last | regex_replace("/", "\\") }}'
+        state: absent
+        owner: "{{ qbittorrent_uid }}"
+        group: "{{ qbittorrent_gid }}"
+      check_mode: true
+      loop: "{{ qbittorrent_config_overrides_superseded_keys }}"
+      register: qbittorrent_config_overrides_superseded_check_result
+
     - name: Determine whether qBittorrent configuration overrides need applying
       ansible.builtin.set_fact:
-        qbittorrent_config_overrides_changes_necessary: "{{ qbittorrent_config_overrides_check_result.changed | default(false) }}"
+        qbittorrent_config_overrides_changes_necessary: >-
+          {{
+            qbittorrent_config_overrides_check_result.changed | default(false)
+            or qbittorrent_config_overrides_superseded_check_result.changed | default(false)
+          }}
 
     - name: Apply qBittorrent configuration overrides
       when: qbittorrent_config_overrides_changes_necessary | bool
@@ -141,6 +160,16 @@
           loop: "{{ qbittorrent_config_overrides }}"
           loop_control:
             label: "[{{ item.section }}] {{ item.option }}"
+
+        - name: Ensure qBittorrent settings superseded by configuration overrides are removed  # noqa risky-file-permissions
+          community.general.ini_file:
+            path: "{{ qbittorrent_config_file_path }}"
+            section: "{{ item.split('/', 1) | first }}"
+            option: '{{ item.split("/", 1) | last | regex_replace("/", "\\") }}'
+            state: absent
+            owner: "{{ qbittorrent_uid }}"
+            group: "{{ qbittorrent_gid }}"
+          loop: "{{ qbittorrent_config_overrides_superseded_keys }}"
 
         - name: Ensure qBittorrent systemd service is started back after applying configuration overrides
           when: qbittorrent_service_was_running | bool
