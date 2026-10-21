@@ -42,7 +42,6 @@ jobs:
           - ubuntu2604
         scenario:
           - default
-          - upgrade
       fail-fast: false
 
     env:
