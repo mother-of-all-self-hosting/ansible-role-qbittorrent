@@ -220,6 +220,19 @@
           retries: 120
           delay: 5
 
+        # Read the temporary password the way `--tags=print-password-qbittorrent`
+        # does, so that a change to qBittorrent's log line fails here, not for users.
+        - name: Run the tasks behind the print-password-qbittorrent tag
+          ansible.builtin.include_role:
+            name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
+            tasks_from: print_password_qbittorrent
+
+        - name: Assert the print-password-qbittorrent tasks found the temporary password
+          ansible.builtin.assert:
+            that: qbittorrent_temporary_password is match('^[A-Za-z0-9]+$')
+            fail_msg: "The tasks found `{{ qbittorrent_temporary_password }}`"
+            success_msg: "The tasks found the temporary password"
+
         - name: Verify nothing was quietly restarting while all of that was being checked
           when: "qbittorrent_restarts_check_enabled | bool"
           block:
