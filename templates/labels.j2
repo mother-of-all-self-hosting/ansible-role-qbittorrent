@@ -19,7 +19,7 @@ traefik.http.middlewares.{{ qbittorrent_identifier }}-basic-auth.basicauth.users
 {% endif %}
 
 {% if qbittorrent_container_labels_traefik_path_prefix != '/' %}
-traefik.http.middlewares.{{ qbittorrent_identifier }}-slashless-redirect.redirectregex.regex=^({{ qbittorrent_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ qbittorrent_identifier }}-slashless-redirect.redirectregex.regex=^(https?://[^/]+{{ qbittorrent_container_labels_traefik_path_prefix | regex_escape }})$
 traefik.http.middlewares.{{ qbittorrent_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
 {% set middlewares = middlewares + [qbittorrent_identifier + '-slashless-redirect'] %}
 {% endif %}
